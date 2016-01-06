@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+#==============================================================================
+#author			:Miryam de Lhoneux
+#email			:miryam.de_lhoneux@lingfil.uu.se
+#date			:2015/12/30
+#version		:0.1
+#description	:Transform parse detransform experiment pipeline on a treebank
+#usage			:python scripts/experiment.py treebank_name (POS-style)
+#Python version :2.7.6
+#==============================================================================
+
+
+import sys
+import config
+from src.malteval import Malteval
+from src.treebank_transformer import TreebankTransformer
+
+malteval = Malteval()
+
+def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
+    #TODO: have options for what goes in table
+    if not outdir: outdir= config.exp + treebank_name + "/"
+    TM = TreebankTransformer(treebank_name=treebank_name,use_cpostag=use_cpostag, pos_style=pos_style)
+    TM.transform_parse_detransform()
+
+    """FILES"""
+    train_gold = TM.trainfile
+    train_ms =  TM.transformed_train
+    train_backtransf = TM.back_transf
+    test_gold = TM.testfile
+
+    parsed_baseline = outdir +  'dev_parsed_baseline.conll'
+    parsed_ud = TM.parsed_ud
+
+    """RESULTS"""
+    buas, blas= malteval.accuracy(test_gold,parsed_baseline)
+    uas, las = malteval.accuracy(test_gold,parsed_ud)
+    accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
+    blas = str(float(blas)*100)
+    las = str(float(las)*100)
+    #significance of las
+    sig = malteval.significance(test_gold, parsed_baseline, parsed_ud)
+    las += sig
+    #output = "%s;%s;%s;%s"%(treebank_name, uas, las, accuracy_of_back_transf)
+    output = "%s;%s;%s\n"%(treebank_name, blas, las)
+    return output
+
+def evaluate_on_transformed_gold(treebank_name,outdir=None):
+    """Evaluate on the transformed representation as gold standard"""
+    if not outdir: outdir= config.exp + treebank_name
+    TM = TreebankTransformer(treebank_name=treebank_name)
+    dev_gold_ms = "%sdev_gold.ms.conll"%outdir
+    parsed_ms = "%sdev_parsed.ms.conll"%outdir
+    parsed_baseline = outdir +  'dev_parsed_baseline.conll'
+    baseline_ms = outdir + 'dev_parsed_baseline.ms.conll'
+    TM.transform(TM.testfile, dev_gold_ms, "transform")
+    TM.transform(parsed_baseline, baseline_ms, "transform")
+    uas, las = malteval.accuracy(dev_gold_ms,parsed_ms)
+    buas, blas = malteval.accuracy(dev_gold_ms,baseline_ms)
+    las = str(float(las)*100)
+    blas = str(float(blas)*100)
+    output = "%s;%s;%s\n"%(treebank_name, las, blas)
+    return output
+
+def check_non_projectivity(treebank_name,outdir=None):
+    if not outdir: outdir= config.exp + treebank_name
+    """FILES"""
+    train_gold = outdir + '/train.conll'
+    train_ms = outdir + '/train_ms.conll'
+    train_backtransf = outdir + '/train_backtransf.conll'
+
+    """RESULTS"""
+    gold_proj, ms_proj= malteval.non_projectivity(train_gold,train_ms)
+    gold_proj, back_transf_proj = malteval.non_projectivity(train_gold,train_backtransf)
+
+    out = "%s;%s;%s;%s\n"%(treebank_name, gold_proj,ms_proj,back_transf_proj)
+    return out
+
+if __name__=="__main__":
+    treebank_name = sys.argv[1]
+    pos_style = "ud"
+    if len(sys.argv) > 2:
+        pos_style = sys.argv[2]
+    res = open('exp_results_%s.csv'%(treebank_name), "w")
+    res.write("treebank_name;baseline LAS; transformed LAS\n")
+    output = run_experiment(treebank_name)
+    res.write(output)

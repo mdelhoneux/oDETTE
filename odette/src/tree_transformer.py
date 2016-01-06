@@ -1,0 +1,215 @@
+#!/usr/bin/env python
+#==============================================================================
+#author			:Miryam de Lhoneux
+#email			:miryam.de_lhoneux@lingfil.uu.se
+#date			:2015/12/30
+#version		:0.1
+#description	:Class to transform representations in dependency graphs
+#               :Currently only verb group transformation is implemented
+#Python version :2.7.6
+#==============================================================================
+
+
+from src.dependency_graph import DependencyGraph
+from src.verbgroup import VerbGroup, VerbGroupMS
+
+class TreeTransformer(object):
+    def __init__(self,tree, pos_style="ud", *args,**kwargs):
+        self.dg = tree
+        self._pos_style = pos_style #to determine what is an auxiliary dependency
+        super(TreeTransformer,self).__init__(*args,**kwargs)
+
+    def transform(self):
+        raise NotImplementedError
+
+    def detransform(self):
+        raise NotImplementedError
+
+    def invert_dep(self,a,b):
+        """
+        there is a dependency between a and b
+        b is the head of a and c is in turn the head of b
+        a becomes the head of b and c becomes the head of a
+        the deprel between b and c becomes the deprel between a and c
+        """
+        a_ID, a_deprel = a.ID, a.deprel
+        b_head, b_deprel = b.head, b.deprel
+
+        a.head = b_head
+        a.deprel = b_deprel
+        b.head = a_ID
+        b.deprel = a_deprel
+
+    def move_dependents(self,a,b):
+        """move dependents from a to b"""
+        a_deps = self.dg.get_dependents(a)
+        for ad in a_deps:
+            ad.head = b.ID
+
+class VGtransformer(TreeTransformer):
+    """
+    A class to transform verb groups in dependency trees
+    """
+    #WARNING: I assume there are never 3 auxiliaries and hence neglected those
+    #cases because it is not worth the coding effort
+    def __init__(self, *args, **kwargs):
+        self.n_double_aux = 0
+        self.n_right_aux = 0
+        self.tot_aux = 0
+        super(VGtransformer, self).__init__(*args, **kwargs)
+
+    def disambiguate_vg_postags(self):
+        VGs = self.find_vgs_in_ud()
+        for vg in VGs:
+            if self._pos_style == "ud":
+                vg.main_verb.postag = "VERB"
+            elif self._pos_style == "sdt":
+                vg.main_verb.postag = "Verb-main"
+            for i in vg.aux_ids:
+                if self._pos_style == "ud":
+                    self.dg[i-1].postag = "AUX"
+                elif self._pos_style == "sdt":
+                    self.dg[i-1].postag = "Verb-copula"
+
+    def transform(self):
+        """
+        The function first looks for verb groups in the sentence. A verb group has a main verb
+        and at least one auxiliary.
+        When there's just one auxiliary, it changes the dependency direction between
+        the auxiliary and main verb and the head of the main verb becomes the head
+        of the auxiliary
+        When there are several auxiliaries, it attaches the closest one to the verb
+        and the head of the main verb becomes the head of the outermost one
+        It then deals with the dependents of the main verb to keep projecivity:
+        dependents to the left of the leftmost verb get attached to the leftmost verb
+        dependents to the right of the rightmost verb get attached to the rightmost verb
+        remaining dependents get attached to the auxiliary that is closest to the verb
+        """
+        VGs = self.find_vgs_in_ud()
+        for vg in VGs:
+            if len(vg.aux_ids) == 1:
+                self.invert_dep(vg.main_aux, vg.main_verb)
+            else:
+                #if len(vg.aux_ids) >2:
+                #self.dg.to_latex() #how I found the strange Danish example
+                self.vg_to_chain(vg)
+            self.projectivize(vg)
+
+    def detransform(self):
+        """Attach auxiliaries and their dependents to the main verb"""
+        VGs = self.find_vgs_in_ms()
+        for vg in VGs:
+            self.invert_dep(vg.main_verb, vg.outermost_aux)
+            for aux in vg.aux_ids:
+                #other auxiliaries are dependent of an aux
+                #and get moved at the same time as other dependents
+                self.move_dependents(self.dg[aux-1],vg.main_verb)
+
+    def is_aux_dependency(self,dep):
+        if self._pos_style == "ud":
+            return self.is_aux_dependency_in_ud(dep)
+        elif self._pos_style == "sdt":
+            return self.is_aux_dependency_in_sdt(dep)
+
+    def is_aux_dependency_in_ud(self,dep):
+        """Only auxiliary dependencies between verbal forms (aux or verb) are considered"""
+        aux_tags = ["AUX", "VERB"]
+        return ((dep.deprel == "aux") and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
+
+    def is_aux_dependency_in_sdt(self,dep):
+        return (dep.deprel == "AuxV")
+
+    def is_head_of_aux_dependency(self,dependency):
+        """return the dependency relation if it is"""
+        deps = self.dg.get_dependents(dependency)
+        for dep in deps:
+            if self.is_aux_dependency(dep):
+                return dep
+        return None
+
+    def find_vgs_in_ud(self):
+        """
+        Pass sentence left to right collecting auxiliares,
+        their main verbs and the other auxiliaries of the main verb
+        Input: dependency graph
+        output: list of verb group objects
+        """
+        VGs = []
+        main_verbs = []
+        vg = VerbGroup()
+        i = -1
+        while i < (len(self.dg) -1):
+            i += 1
+            if self.is_aux_dependency(self.dg[i]):
+                self.tot_aux += 1
+                aux = self.dg[i]
+                if aux.head not in main_verbs: #new verb group
+                    self.save_vg(vg,VGs) #save previous vg
+                    main_verbs.append(aux.head)
+                    vg = VerbGroup()
+                    vg.aux_ids.append(aux.ID)
+                    vg.main_verb = self.dg[aux.head - 1]
+                else:
+                    vg.aux_ids.append(aux.ID)
+        self.save_vg(vg,VGs) #save last vg
+        return VGs
+
+    def find_vgs_in_ms(self):
+        VGs = []
+        vg = VerbGroupMS()
+        i = -1
+        all_aux = []
+        while i < (len(self.dg) -1):
+            i += 1
+            if self.is_aux_dependency(self.dg[i]):
+                aux = self.dg[i].head
+                if aux not in all_aux:
+                    vg.aux_ids.append(aux)
+                    #check if it's another aux otherwise it's the main verb
+                    #Warning: works with double dependencies, not more
+                    aux_bis = self.is_head_of_aux_dependency(self.dg[i])
+                    if aux_bis:
+                        vg.main_verb = aux_bis
+                        vg.aux_ids.append(self.dg[i].ID)
+                        all_aux.append(self.dg[i].ID)
+                    else:
+                        vg.main_verb = self.dg[i]
+                        outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
+                    vg.outermost_aux = self.dg[outermost_aux_id -1]
+                    VGs.append(vg)
+                    vg = VerbGroupMS()
+        return VGs
+
+
+    def save_vg(self,vg,VGs):
+        if len(vg.aux_ids) > 0:
+            #used those to check the pos tags in slov
+            #aux_pos = [self.dg[i-1].postag for i in vg.aux_ids]
+            #print "%s;"%vg.main_verb.postag + ";".join(aux_pos)
+            vg.aux_ids.sort()
+            vg.rightmost_verb = self.dg[max(vg.aux_ids[-1],vg.main_verb.ID) - 1]
+            vg.leftmost_verb = self.dg[min(vg.aux_ids[0],vg.main_verb.ID) - 1]
+            main_aux_id = self.dg.closest_to(vg.aux_ids, vg.main_verb.ID)
+            vg.main_aux = self.dg[main_aux_id - 1]
+            VGs.append(vg)
+
+    def vg_to_chain(self,vg):
+        mv_head,mv_deprel = vg.main_verb.head, vg.main_verb.deprel
+        vg.main_verb.head = vg.main_aux.ID
+        vg.main_verb.deprel = vg.main_aux.deprel
+        remaining_aux = [aux for aux in vg.aux_ids if aux is not vg.main_aux.ID]
+        #Warning: here I assume there's only one remaining aux
+        outermost_remaining_aux = self.dg[remaining_aux[0]-1]
+        vg.main_aux.head = outermost_remaining_aux.ID
+        outermost_remaining_aux.head = mv_head
+        outermost_remaining_aux.deprel = mv_deprel
+
+    def projectivize(self,vg):
+        deps = self.dg.get_dependents(vg.main_verb)
+        for dep in deps:
+            if dep.is_to_the_left_of(vg.leftmost_verb):
+                dep.head = vg.leftmost_verb.ID
+            elif dep.is_to_the_right_of(vg.rightmost_verb):
+                dep.head = vg.rightmost_verb.ID
+            else:
+                dep.head = vg.main_aux.ID

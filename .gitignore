@@ -1,0 +1,17 @@
+*.pyc
+*.aux
+*.log
+*.nav
+*.out
+*.pdf
+*.snm
+*.tex
+*.toc
+*.png
+*.mco
+EXP/
+EXP_res/
+*.csv
+Figures/
+env/
+config.py
