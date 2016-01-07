@@ -14,4 +14,3 @@ EXP_res/
 *.csv
 Figures/
 env/
-config.py

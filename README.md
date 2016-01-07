@@ -36,5 +36,5 @@ $python odette/scripts/experiment.py treebank_name POS-style (ud or sdt) #to run
 $python odette/scripts/collect_stats.py treebank_name trainfile testfile #to collect stats of a single language
 $python odette/scripts/transform_file.py infile outfile [transform|detransform|to_conllx] #to apply the change to a file
 $python odette/src/parsers.py trainfile testfile outfile #to train Maltparser on a file and parse another
-$python odette/src/malteval.py gold test #to print LAS UAS of a parsed file
+$python odette/src/malteval.py goldfile testfile #to print LAS UAS of a parsed file
 ```
