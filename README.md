@@ -5,6 +5,7 @@ A python package that is first aimed to serve as a platform for experiments on U
 $git clone repository 
 $pip install -r requirements.txt
 $export PYTHONPATH=$PYTHONPATH:path/to/directory
+$mkdir EXP #this will contain the files that the package will work with
 ```
 ###Requirements: 
 python 2.7
