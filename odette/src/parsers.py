@@ -29,11 +29,11 @@ class MaltParser(Parser):
     def train(self, trainfile):
         parser_mco = "./parser.mco"
         if os.path.exists(parser_mco): os.remove(parser_mco) #maybe I should check if there is any parser?
-        cmd = "java -jar -Xmx8g %s/maltparser-1.8.1.jar -c %s -m learn -i %s -grl root"%(self._path_to_malt, self.name, trainfile)
+        cmd = "java -jar -Xmx2g %s/maltparser-1.8.1.jar -c %s -m learn -i %s -grl root"%(self._path_to_malt, self.name, trainfile)
         os.system(cmd)
 
     def parse(self, testfile, outfile):
-        cmd = "java -jar -Xmx8g %s/maltparser-1.8.1.jar -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
+        cmd = "java -jar -Xmx2g %s/maltparser-1.8.1.jar -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
         os.system(cmd)
 
 if __name__=="__main__":

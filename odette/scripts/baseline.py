@@ -11,7 +11,7 @@
 
 
 import sys, os
-import config
+from odette import config
 from src.malteval import Malteval
 from src.parsers import MaltParser
 from src.treebank_transformer import TreebankTransformer
@@ -64,5 +64,6 @@ if __name__=="__main__":
         pos_style = sys.argv[5]
     res = open('baseline_results_%s_%s.csv'%(treebank_name,ambig), "w")
     res.write("treebank_name;LAS;UAS\n")
-    output = run_baseline(treebank_name,trainfile=train,testfile=test,ambig=ambig,pos_style=pos_style)
+    output = run_baseline(treebank_name,trainfile=train,testfile=test,ambig=ambig,pos_style=pos_style,
+                 use_cpostag=True)
     res.write(output)

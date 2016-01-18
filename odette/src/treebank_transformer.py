@@ -50,7 +50,8 @@ class TreebankTransformer():
         self._parser.train(self.transformed_train)
         self._parser.parse(self.testfile,self.parsed_ms)
         self.transform(self.parsed_ms, self.parsed_ud, "detransform")
-        self.transform(self.transformed_train, self.back_transf, "detransform")
+        #TODO: somehow buggy with copula exp
+        #self.transform(self.transformed_train, self.back_transf, "detransform")
 
     def count_aux(self, infile):
         """return n of aux n of tokens and n of sentences"""

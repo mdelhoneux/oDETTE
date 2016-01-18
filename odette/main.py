@@ -66,6 +66,7 @@ if __name__=="__main__":
     arg_parser.add_argument('--version', default = 'v1_2', help='[v1_1|v1_2] The version of UD.  Default = v1_2 which corresponds to v1.2. Note: The version needs to contain a iso dictionary in utils ')
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in included)")
+    #TODO: default should be yes
     arg_parser.add_argument('--use_cpostag', default = 0, help="[1 for true|0 for False] Use the cpostag instead of the postag for parsing. Default = False")
 
     args = arg_parser.parse_args()

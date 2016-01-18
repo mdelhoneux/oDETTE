@@ -11,7 +11,7 @@
 
 
 import sys
-import config
+from odette import config
 from src.malteval import Malteval
 from src.treebank_transformer import TreebankTransformer
 
@@ -35,7 +35,8 @@ def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
     """RESULTS"""
     buas, blas= malteval.accuracy(test_gold,parsed_baseline)
     uas, las = malteval.accuracy(test_gold,parsed_ud)
-    accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
+    #TODO: repair but currently somehow this breaks on copula exp
+    #accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
     blas = str(float(blas)*100)
     las = str(float(las)*100)
     #significance of las
@@ -79,9 +80,11 @@ def check_non_projectivity(treebank_name,outdir=None):
 if __name__=="__main__":
     treebank_name = sys.argv[1]
     pos_style = "ud"
+    ambig = "orig"
     if len(sys.argv) > 2:
         pos_style = sys.argv[2]
+        ambig = sys.argv[3]
     res = open('exp_results_%s.csv'%(treebank_name), "w")
     res.write("treebank_name;baseline LAS; transformed LAS\n")
-    output = run_experiment(treebank_name)
+    output = run_experiment(treebank_name, use_cpostag=True)
     res.write(output)

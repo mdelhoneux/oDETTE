@@ -38,6 +38,12 @@ class DependencyGraph(list):
     def get_right_dependents(self,word):
         return [dep for dep in self if (dep.ID > word.ID) and (dep.head == word.ID)]
 
+    def has_cop_deprel(self):
+        for dep in self:
+            if dep.deprel == "cop":
+                return True
+        return False
+
     def to_conllx(self, use_cpostag=False):
         """
         make sure last two columns are underscore and postag is not empty
@@ -123,4 +129,4 @@ class DependencyGraph(list):
                         + " \n \end{document}" )
 
         out.close()
-        os.system("sh ./src/createfigure.sh")
+        os.system("sh ./odette/src/createfigure.sh")

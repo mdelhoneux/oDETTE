@@ -38,8 +38,11 @@ class ConllFileHandler():
                 if line.startswith("#"):
                     continue
                 if line in ('\n', '\r\n'):#blank lines are end of sentences
-                    dependency_graphs.append(dg)#retrieve the dg and reinitialize
-                    dg = DependencyGraph()
+                    #TODO: remove or make it an option
+                    #remove any dg that has a copula deprel
+                    if not dg.has_cop_deprel():
+                        dependency_graphs.append(dg)#retrieve the dg 
+                    dg = DependencyGraph()#reinitialize
                 else:
                     line = line.strip("\n")
                     dep = self.line_to_dependency(line, separator)
