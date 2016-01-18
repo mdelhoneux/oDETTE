@@ -1,5 +1,9 @@
 # oDETTE (DEpendency Treebank Transformation and Evaluation)
 A python package that is first aimed to serve as a platform for experiments on UD treebanks but can also be used with other dependency treebanks. It can be used to test parsers on all UD languages. Currently only MaltParser can be used. The package is first aimed at performing tree transformations. Currently only the verb group transformation has been implemented. Experiments are run in parallel to ensure fast results.
+
+#Note
+This is work in progress. Version 0.1 corresponds to the code used in a paper submitted for the course Language Technology: Research and Development at Uppsala University in the autumn semester 2015.
+
 #Installation instructions
 ```bash
 $git clone repository 

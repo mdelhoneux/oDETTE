@@ -10,7 +10,8 @@
 *.png
 *.mco
 EXP/
-EXP_res/
+RES/
 *.csv
 Figures/
 env/
+odette/config.py
