@@ -14,4 +14,3 @@ RES/
 *.csv
 Figures/
 env/
-odette/config.py
