@@ -35,9 +35,7 @@ def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
     """RESULTS"""
     buas, blas= malteval.accuracy(test_gold,parsed_baseline)
     uas, las = malteval.accuracy(test_gold,parsed_ud)
-    #TODO: repair but currently somehow this breaks on copula exp
-    #accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
-    blas = str(float(blas)*100)
+    accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
     las = str(float(las)*100)
     #significance of las
     sig = malteval.significance(test_gold, parsed_baseline, parsed_ud)

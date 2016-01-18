@@ -174,7 +174,7 @@ class VGtransformer(TreeTransformer):
                         all_aux.append(self.dg[i].ID)
                     else:
                         vg.main_verb = self.dg[i]
-                        outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
+                    outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
                     #TODO: now I get a bug on this with the copula exp
                     vg.outermost_aux = self.dg[outermost_aux_id -1]
                     VGs.append(vg)
