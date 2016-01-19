@@ -8,7 +8,7 @@ This is work in progress. Version 0.1 corresponds to the code used in a paper su
 ```bash
 $git clone repository 
 $pip install -r requirements.txt
-$export PYTHONPATH=$PYTHONPATH:path/to/directory (/!\ odette dir not oDETTE)
+$export PYTHONPATH=$PYTHONPATH:path/to/directory
 $mkdir EXP #this will contain the files that the package will work with
 ```
 ###Requirements: 
