@@ -39,9 +39,8 @@ class ConllFileHandler():
                     continue
                 if line in ('\n', '\r\n'):#blank lines are end of sentences
                     #TODO: remove or make it an option
-                    #remove any dg that has a copula deprel
-                    if not dg.has_cop_deprel():
-                        dependency_graphs.append(dg)#retrieve the dg 
+                    #if not dg.has_cop_deprel(): #remove any dg that has a copula deprel
+                    dependency_graphs.append(dg)#retrieve the dg 
                     dg = DependencyGraph()#reinitialize
                 else:
                     line = line.strip("\n")

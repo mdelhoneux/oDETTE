@@ -41,7 +41,7 @@ def table_headers(exp_type):
     if exp_type == "baseline":
         return "language;LAS;UAS\n"
     elif exp_type =="exp":
-        return "language;baseline LAS; transformed LAS\n"
+        return "language;baseline LAS; transformed LAS; backtransformation accuracy\n"
     elif exp_type =="stats":
         return "language;n sentences; n tokens; aux freq \n"
     elif exp_type == "ms_gold":

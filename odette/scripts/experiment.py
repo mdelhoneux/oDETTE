@@ -37,11 +37,13 @@ def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
     uas, las = malteval.accuracy(test_gold,parsed_ud)
     accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
     las = str(float(las)*100)
+    blas = str(float(blas)*100)
+    accuracy_of_back_transf = str(float(accuracy_of_back_transf)*100)
     #significance of las
     sig = malteval.significance(test_gold, parsed_baseline, parsed_ud)
     las += sig
-    #output = "%s;%s;%s;%s"%(treebank_name, uas, las, accuracy_of_back_transf)
-    output = "%s;%s;%s\n"%(treebank_name, blas, las)
+    output = "%s;%s;%s;%s\n"%(treebank_name, blas, las, accuracy_of_back_transf)
+    #output = "%s;%s;%s\n"%(treebank_name, blas, las)
     return output
 
 def evaluate_on_transformed_gold(treebank_name,outdir=None):
@@ -82,7 +84,7 @@ if __name__=="__main__":
     if len(sys.argv) > 2:
         pos_style = sys.argv[2]
         ambig = sys.argv[3]
-    res = open('exp_results_%s.csv'%(treebank_name), "w")
+    res = open('exp_results_%s_%s.csv'%(treebank_name, ambig), "w")
     res.write("treebank_name;baseline LAS; transformed LAS\n")
     output = run_experiment(treebank_name, use_cpostag=True)
     res.write(output)

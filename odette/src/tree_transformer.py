@@ -167,6 +167,7 @@ class VGtransformer(TreeTransformer):
                     vg.aux_ids.append(aux)
                     #check if it's another aux otherwise it's the main verb
                     #Warning: works with double dependencies, not more
+                    #TODO: fix it
                     aux_bis = self.is_head_of_aux_dependency(self.dg[i])
                     if aux_bis:
                         vg.main_verb = aux_bis
@@ -175,7 +176,6 @@ class VGtransformer(TreeTransformer):
                     else:
                         vg.main_verb = self.dg[i]
                     outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
-                    #TODO: now I get a bug on this with the copula exp
                     vg.outermost_aux = self.dg[outermost_aux_id -1]
                     VGs.append(vg)
                     vg = VerbGroupMS()
@@ -200,6 +200,7 @@ class VGtransformer(TreeTransformer):
         vg.main_verb.deprel = vg.main_aux.deprel
         remaining_aux = [aux for aux in vg.aux_ids if aux is not vg.main_aux.ID]
         #Warning: here I assume there's only one remaining aux
+        #TODO: fix it
         outermost_remaining_aux = self.dg[remaining_aux[0]-1]
         vg.main_aux.head = outermost_remaining_aux.ID
         outermost_remaining_aux.head = mv_head
