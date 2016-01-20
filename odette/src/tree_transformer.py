@@ -165,6 +165,7 @@ class VGtransformer(TreeTransformer):
                     vg.aux_ids.append(aux)
                     all_aux.append(aux)
                     #filtering out cases of aux on both sides
+                    #TODO: deal with this more elegantly
                     try:
                         self.recurse_chain(vg,i,all_aux)
                     except:
@@ -178,6 +179,7 @@ class VGtransformer(TreeTransformer):
 
     def recurse_chain(self,vg,i,all_aux):
         #TODO: can I generalize this?
+        #TODO: rename those guys I always work left to right
         if self.dg.head_is_to_the_right(self.dg[i]):
             vg.main_verb = self.dg[i]
             self.recurse_right(vg,self.dg[i].head-1,all_aux)
@@ -198,7 +200,7 @@ class VGtransformer(TreeTransformer):
         if i_next:
             vg.aux_ids.append(self.dg[i].ID)
             all_aux.append(self.dg[i].ID)
-            self.recurse_left(vg,i_next,all_aux)
+            self.recurse_left(vg,i_next-1,all_aux)
         else:
             vg.main_verb = self.dg[i]
 
@@ -225,7 +227,6 @@ class VGtransformer(TreeTransformer):
         #head of main verb becomes head of outermost aux
         vg.outermost_aux.head = mv_head
         vg.outermost_aux.deprel = mv_deprel
-        #TODO: not entirely correct - might not deal with double aux properly
         #remaining aux: a chain from the outermost to the main verb
         #main verb is to the right
         if vg.outermost_aux.ID < vg.main_verb.ID:
