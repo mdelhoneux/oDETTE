@@ -92,7 +92,6 @@ class VGtransformer(TreeTransformer):
                 #self.dg.to_latex() #how I found the strange Danish example
                 self.vg_to_chain(vg)
             self.projectivize(vg)
-        self.dg.to_latex()
 
     def detransform(self):
         """Attach auxiliaries and their dependents to the main verb"""
@@ -103,7 +102,6 @@ class VGtransformer(TreeTransformer):
                 #other auxiliaries are dependent of an aux
                 #and get moved at the same time as other dependents
                 self.move_dependents(self.dg[aux-1],vg.main_verb)
-        self.dg.to_latex()
 
     def is_aux_dependency(self,dep):
         if self._pos_style == "ud":
