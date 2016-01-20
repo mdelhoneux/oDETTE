@@ -165,9 +165,10 @@ class VGtransformer(TreeTransformer):
                     vg.aux_ids.append(aux)
                     all_aux.append(aux)
                     #filtering out cases of aux on both sides
+                    #(they get caught in infinite recursion)
                     #TODO: deal with this more elegantly
                     try:
-                        self.recurse_chain(vg,i,all_aux)
+                        self.recurse_aux_chain(vg,i,all_aux)
                     except:
                         RuntimeError
                         break
@@ -177,33 +178,37 @@ class VGtransformer(TreeTransformer):
                     vg = VerbGroupMS()
         return VGs
 
-    def recurse_chain(self,vg,i,all_aux):
-        #TODO: can I generalize this?
-        #TODO: rename those guys I always work left to right
+    def recurse_aux_chain(self,vg,i,all_aux):
+        """
+        Recurse the chain of auxiliary dependency relations
+        If the main verb is to the left, the recursion follows the heads of
+        auxiliary dependency relations
+        If the main verb is to the right, the recursion follows the dependents
+        of auxiliary dependency relations until it finds the main verb
+        """
         if self.dg.head_is_to_the_right(self.dg[i]):
             vg.main_verb = self.dg[i]
-            self.recurse_right(vg,self.dg[i].head-1,all_aux)
+            self.recurse_aux_chain_via_head(vg,self.dg[i].head-1,all_aux)
         else:
-            self.recurse_left(vg,i,all_aux)
+            self.recurse_aux_chain_via_dependent(vg,i,all_aux)
 
-    def recurse_right(self,vg,i,all_aux):
+    def recurse_aux_chain_via_head(self,vg,i,all_aux):
         #the head is itself the head of an aux dependency relation
         head = self.dg[self.dg[i].head -1]
         if self.is_aux_dependency(self.dg[i]):
             vg.aux_ids.append(head.ID)
             all_aux.append(head.ID)
-            self.recurse_right(vg,head.ID -1,all_aux)
+            self.recurse_aux_chain_via_head(vg,head.ID -1,all_aux)
 
-    def recurse_left(self,vg,i,all_aux):
+    def recurse_aux_chain_via_dependent(self,vg,i,all_aux):
         i_next = self.is_head_of_aux_dependency(self.dg[i])
         #the dependent is itself the head of an aux dependency relation
         if i_next:
             vg.aux_ids.append(self.dg[i].ID)
             all_aux.append(self.dg[i].ID)
-            self.recurse_left(vg,i_next-1,all_aux)
+            self.recurse_aux_chain_via_dependent(vg,i_next-1,all_aux)
         else:
             vg.main_verb = self.dg[i]
-
 
     def save_vg(self,vg,VGs):
         if len(vg.aux_ids) > 0:
