@@ -162,6 +162,9 @@ class VGtransformer(TreeTransformer):
             if self.is_aux_dependency(self.dg[i]):
                 aux = self.dg[i].head
                 if aux not in all_aux:
+                    #if it is it might still have a head that intersests us!
+                    #TODO: not maintain a list of all_aux but actually look at
+                    #which vg you modify
                     vg.aux_ids.append(aux)
                     all_aux.append(aux)
                     self.recurse_chain(vg,i,all_aux)

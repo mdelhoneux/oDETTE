@@ -11,7 +11,7 @@
 
 
 import sys, os
-from odette import config
+import config
 from src.malteval import Malteval
 from src.parsers import MaltParser
 from src.treebank_transformer import TreebankTransformer

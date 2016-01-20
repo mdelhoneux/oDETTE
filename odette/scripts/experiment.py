@@ -11,7 +11,7 @@
 
 
 import sys
-from odette import config
+import config
 from src.malteval import Malteval
 from src.treebank_transformer import TreebankTransformer
 
@@ -24,26 +24,30 @@ def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
     TM.transform_parse_detransform()
 
     """FILES"""
-    train_gold = TM.trainfile
-    train_ms =  TM.transformed_train
-    train_backtransf = TM.back_transf
     test_gold = TM.testfile
-
     parsed_baseline = outdir +  'dev_parsed_baseline.conll'
     parsed_ud = TM.parsed_ud
 
     """RESULTS"""
     buas, blas= malteval.accuracy(test_gold,parsed_baseline)
     uas, las = malteval.accuracy(test_gold,parsed_ud)
-    accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
     las = str(float(las)*100)
     blas = str(float(blas)*100)
-    accuracy_of_back_transf = str(float(accuracy_of_back_transf)*100)
     #significance of las
     sig = malteval.significance(test_gold, parsed_baseline, parsed_ud)
     las += sig
-    output = "%s;%s;%s;%s\n"%(treebank_name, blas, las, accuracy_of_back_transf)
-    #output = "%s;%s;%s\n"%(treebank_name, blas, las)
+    output = "%s;%s;%s\n"%(treebank_name, blas, las)
+    return output
+
+def evaluate_back_transformation_accuracy(treebank_name,outdir=None):
+    if not outdir: outdir= config.exp + treebank_name + "/"
+    TM = TreebankTransformer(treebank_name=treebank_name)
+    TM.transform_detransform_trainfile()
+    train_gold = TM.trainfile
+    train_backtransf = TM.back_transf
+    accuracy_of_back_transf = malteval.accuracy(train_gold,train_backtransf)[0]
+    accuracy_of_back_transf = str(float(accuracy_of_back_transf)*100)
+    output = "%s;%s\n"%(treebank_name,accuracy_of_back_transf)
     return output
 
 def evaluate_on_transformed_gold(treebank_name,outdir=None):

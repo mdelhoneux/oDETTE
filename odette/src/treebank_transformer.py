@@ -42,7 +42,6 @@ class TreebankTransformer():
         self.parsed_ms = "%sdev_parsed.ms.conll"%self.outdir
         self.parsed_ud = "%sdev_parsed.ud.conll"%self.outdir
         self.transformed_train = "%strain.ms.conll"%self.outdir
-        self.back_transf =  "%strain_backtransf.conll"%self.outdir
 
     def transform_parse_detransform(self):
         self.init_files_for_transformation()
@@ -50,6 +49,12 @@ class TreebankTransformer():
         self._parser.train(self.transformed_train)
         self._parser.parse(self.testfile,self.parsed_ms)
         self.transform(self.parsed_ms, self.parsed_ud, "detransform")
+
+    def transform_detransform_trainfile(self):
+        #TODO: could concatenate train and test but not sure would change much
+        self.transformed_train = "%strain.ms.conll"%self.outdir
+        self.transform(self.trainfile, self.transformed_train, "transform")
+        self.back_transf =  "%strain_backtransf.conll"%self.outdir
         self.transform(self.transformed_train, self.back_transf, "detransform")
 
     def count_aux(self, infile):
