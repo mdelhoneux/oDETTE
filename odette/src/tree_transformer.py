@@ -164,9 +164,12 @@ class VGtransformer(TreeTransformer):
                 if aux not in all_aux:
                     vg.aux_ids.append(aux)
                     all_aux.append(aux)
-                    self.recurse_chain(vg,i,all_aux)
-                    #if self.dg.head_is_to_the_right(self.dg[i]):
-                    #    import ipdb;ipdb.set_trace()
+                    #filtering out cases of aux on both sides
+                    try:
+                        self.recurse_chain(vg,i,all_aux)
+                    except:
+                        RuntimeError
+                        break
                     outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
                     vg.outermost_aux = self.dg[outermost_aux_id -1]
                     VGs.append(vg)
@@ -222,16 +225,16 @@ class VGtransformer(TreeTransformer):
         #head of main verb becomes head of outermost aux
         vg.outermost_aux.head = mv_head
         vg.outermost_aux.deprel = mv_deprel
-        #TODO: this needs to be sanity checked
+        #TODO: not entirely correct - might not deal with double aux properly
         #remaining aux: a chain from the outermost to the main verb
         #main verb is to the right
         if vg.outermost_aux.ID < vg.main_verb.ID:
-            for i,aux in enumerate(vg.aux_ids[1:]):
-                self.dg[aux-1].head = vg.aux_ids[i-1]
+            for aux in vg.aux_ids[1:]:
+                self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)-1]
         #main verb to the left
         else:
-            for i,aux in enumerate(vg.aux_ids[-2::-1]):
-                self.dg[aux-1].head = vg.aux_ids[i+1]
+            for aux in vg.aux_ids[-2::-1]:
+                self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)+1]
 
     def projectivize(self,vg):
         #TODO: rename? Joakim mentioned that this was not the only goal of
