@@ -20,7 +20,7 @@ class Malteval(object):
 
     def accuracy(self,gold,test):
         """UAS and LAS of test on gold"""
-        cmd = "java -jar -Xmx4g %s/MaltEval.jar -g %s -s %s --row-header 0 --tab 1 --header-info 0 --Metric 'LAS;UAS'"%(self._location,gold,test)
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --row-header 0 --tab 1 --header-info 0 --Metric 'LAS;UAS'"%(self._location,gold,test)
         res = os.popen(cmd)
         accuracies = [line for line in res][2].strip("\n")
         UAS, LAS= accuracies.split("\t")[:2]
@@ -28,7 +28,7 @@ class Malteval(object):
 
     def significance(self,gold,baseline,test):
         """output: ** for p<.01 * for p<.05 and empty string otherwise"""
-        cmd = "java -jar -Xmx4g %s/MaltEval.jar -g %s -s %s %s --row-header 0 --tab 1 --header-info 0 --stat 1 --GroupBy Token:accuracy"%(self._location,gold,baseline, test)
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s %s --row-header 0 --tab 1 --header-info 0 --stat 1 --GroupBy Token:accuracy"%(self._location,gold,baseline, test)
         res = [line for line in os.popen(cmd)]
         #print "\n".join([str(n) + " " + line.strip("\n") for (n,line) in enumerate(res)])
         p_0_1 = int(res[20].split("\t")[1])
@@ -38,7 +38,7 @@ class Malteval(object):
         else: return ""
 
     def significance_uas(self,gold,baseline,test):
-        cmd = "java -jar -Xmx4g %s/MaltEval.jar -g %s -s %s %s --row-header 0 --tab 1 --header-info 0 --stat 1 --GroupBy Token:accuracy --Metric 'UAS'"%(self._location,gold,baseline, test)
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s %s --row-header 0 --tab 1 --header-info 0 --stat 1 --GroupBy Token:accuracy --Metric 'UAS'"%(self._location,gold,baseline, test)
         res = [line for line in os.popen(cmd)]
         #print "\n".join([str(n) + " " + line.strip("\n") for (n,line) in enumerate(res)])
         p_0_1 = int(res[20].split("\t")[1])
