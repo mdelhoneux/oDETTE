@@ -15,12 +15,16 @@ import os
 import sys
 
 class Malteval(object):
+    #TODO: this is all very inelegant - expose more options
     def __init__(self, location=config.malteval):
         self._location = location
 
-    def accuracy(self,gold,test):
+    def accuracy(self,gold,test, exclude_punct=True):
         """UAS and LAS of test on gold"""
+        #TODO: expose the exclude_deprel elsewhere
         cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --row-header 0 --tab 1 --header-info 0 --Metric 'LAS;UAS'"%(self._location,gold,test)
+        if exclude_punct:
+            cmd += " --ExcludeDeprels 'punct'"
         res = os.popen(cmd)
         accuracies = [line for line in res][2].strip("\n")
         UAS, LAS= accuracies.split("\t")[:2]
