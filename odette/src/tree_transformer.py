@@ -162,12 +162,11 @@ class VGtransformer(TreeTransformer):
             if self.is_aux_dependency(self.dg[i]):
                 aux = self.dg[i].head
                 if aux not in all_aux:
-                    #if it is it might still have a head that intersests us!
-                    #TODO: not maintain a list of all_aux but actually look at
-                    #which vg you modify
                     vg.aux_ids.append(aux)
                     all_aux.append(aux)
                     self.recurse_chain(vg,i,all_aux)
+                    #if self.dg.head_is_to_the_right(self.dg[i]):
+                    #    import ipdb;ipdb.set_trace()
                     outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
                     vg.outermost_aux = self.dg[outermost_aux_id -1]
                     VGs.append(vg)
@@ -175,28 +174,31 @@ class VGtransformer(TreeTransformer):
         return VGs
 
     def recurse_chain(self,vg,i,all_aux):
+        #TODO: can I generalize this?
         if self.dg.head_is_to_the_right(self.dg[i]):
-            self.recurse_right(vg,i,all_aux)
+            vg.main_verb = self.dg[i]
+            self.recurse_right(vg,self.dg[i].head-1,all_aux)
         else:
             self.recurse_left(vg,i,all_aux)
 
     def recurse_right(self,vg,i,all_aux):
+        #the head is itself the head of an aux dependency relation
+        head = self.dg[self.dg[i].head -1]
+        if self.is_aux_dependency(self.dg[i]):
+            vg.aux_ids.append(head.ID)
+            all_aux.append(head.ID)
+            self.recurse_right(vg,head.ID -1,all_aux)
+
+    def recurse_left(self,vg,i,all_aux):
         i_next = self.is_head_of_aux_dependency(self.dg[i])
         #the dependent is itself the head of an aux dependency relation
         if i_next:
             vg.aux_ids.append(self.dg[i].ID)
             all_aux.append(self.dg[i].ID)
-            self.recurse_right(vg,i_next,all_aux)
+            self.recurse_left(vg,i_next,all_aux)
         else:
             vg.main_verb = self.dg[i]
 
-    def recurse_left(self,vg,i,all_aux):
-        #the head is itself the head of an aux dependency relation
-        head = self.dg[self.dg[i].head -1]
-        if self.is_aux_dependency(head):
-            vg.aux_ids.append(head)
-            all_aux.append(head)
-            self.recurse_left(vg,self.dg[i].head -1,all_aux)
 
     def save_vg(self,vg,VGs):
         if len(vg.aux_ids) > 0:

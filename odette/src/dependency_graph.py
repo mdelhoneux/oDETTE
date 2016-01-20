@@ -76,19 +76,25 @@ class DependencyGraph(list):
 
     def closest_to(self,wordlist,main_word):
         """Find the word in the wordlist that is closest to the main word"""
+        #TODO: this is ugly
+        diff = abs(main_word - wordlist[0])
         closest = wordlist[0]
-        for word in wordlist:
-            diff = abs(main_word - word)
-            if diff < closest:
+        for word in wordlist[1:]:
+            diff_b = abs(main_word - word)
+            if diff_b < diff:
+                diff = diff_b
                 closest = word
         return closest
 
     def furthest_to(self,wordlist,main_word):
         """Find the word in the wordlist that is furher away from to the main word"""
+        #TODO: this is ugly
+        diff= abs(main_word - wordlist[0])
         furthest = wordlist[0]
-        for word in wordlist:
-            diff = abs(main_word - word)
-            if diff > furthest:
+        for word in wordlist[1:]:
+            diff_b = abs(main_word - word)
+            if diff_b > diff:
+                diff = diff_b
                 furthest = word
         return furthest
 
