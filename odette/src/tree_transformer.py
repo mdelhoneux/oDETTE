@@ -50,8 +50,6 @@ class VGtransformer(TreeTransformer):
     """
     A class to transform verb groups in dependency trees
     """
-    #WARNING: I assume there are never 3 auxiliaries and hence neglected those
-    #cases because it is not worth the coding effort
     def __init__(self, *args, **kwargs):
         self.n_double_aux = 0
         self.n_right_aux = 0
@@ -88,7 +86,7 @@ class VGtransformer(TreeTransformer):
         VGs = self.find_vgs_in_ud()
         for vg in VGs:
             if len(vg.aux_ids) == 1:
-                self.invert_dep(vg.main_aux, vg.main_verb)
+                self.invert_dep(vg.closest_aux, vg.main_verb)
             else:
                 #if len(vg.aux_ids) >2:
                 #self.dg.to_latex() #how I found the strange Danish example
@@ -120,11 +118,11 @@ class VGtransformer(TreeTransformer):
         return (dep.deprel == "AuxV")
 
     def is_head_of_aux_dependency(self,dependency):
-        """return the dependency relation if it is"""
+        """return the ID of the dependency relation if it is"""
         deps = self.dg.get_dependents(dependency)
         for dep in deps:
             if self.is_aux_dependency(dep):
-                return dep
+                return dep.ID
         return None
 
     def find_vgs_in_ud(self):
@@ -165,22 +163,37 @@ class VGtransformer(TreeTransformer):
                 aux = self.dg[i].head
                 if aux not in all_aux:
                     vg.aux_ids.append(aux)
-                    #check if it's another aux otherwise it's the main verb
-                    #Warning: works with double dependencies, not more
-                    #TODO: fix it
-                    aux_bis = self.is_head_of_aux_dependency(self.dg[i])
-                    if aux_bis:
-                        vg.main_verb = aux_bis
-                        vg.aux_ids.append(self.dg[i].ID)
-                        all_aux.append(self.dg[i].ID)
-                    else:
-                        vg.main_verb = self.dg[i]
+                    all_aux.append(aux)
+                    self.recurse_chain(vg,i,all_aux)
                     outermost_aux_id = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
                     vg.outermost_aux = self.dg[outermost_aux_id -1]
                     VGs.append(vg)
                     vg = VerbGroupMS()
         return VGs
 
+    def recurse_chain(self,vg,i,all_aux):
+        if self.dg.head_is_to_the_right(self.dg[i]):
+            self.recurse_right(vg,i,all_aux)
+        else:
+            self.recurse_left(vg,i,all_aux)
+
+    def recurse_right(self,vg,i,all_aux):
+        i_next = self.is_head_of_aux_dependency(self.dg[i])
+        #the dependent is itself the head of an aux dependency relation
+        if i_next:
+            vg.aux_ids.append(self.dg[i].ID)
+            all_aux.append(self.dg[i].ID)
+            self.recurse_right(vg,i_next,all_aux)
+        else:
+            vg.main_verb = self.dg[i]
+
+    def recurse_left(self,vg,i,all_aux):
+        #the head is itself the head of an aux dependency relation
+        head = self.dg[self.dg[i].head -1]
+        if self.is_aux_dependency(head):
+            vg.aux_ids.append(head)
+            all_aux.append(head)
+            self.recurse_left(vg,self.dg[i].head -1,all_aux)
 
     def save_vg(self,vg,VGs):
         if len(vg.aux_ids) > 0:
@@ -190,23 +203,34 @@ class VGtransformer(TreeTransformer):
             vg.aux_ids.sort()
             vg.rightmost_verb = self.dg[max(vg.aux_ids[-1],vg.main_verb.ID) - 1]
             vg.leftmost_verb = self.dg[min(vg.aux_ids[0],vg.main_verb.ID) - 1]
-            main_aux_id = self.dg.closest_to(vg.aux_ids, vg.main_verb.ID)
-            vg.main_aux = self.dg[main_aux_id - 1]
+            closest_aux_id = self.dg.closest_to(vg.aux_ids, vg.main_verb.ID)
+            vg.closest_aux = self.dg[closest_aux_id - 1]
+            outermost_aux = self.dg.furthest_to(vg.aux_ids,vg.main_verb.ID)
+            vg.outermost_aux = self.dg[outermost_aux -1]
             VGs.append(vg)
 
     def vg_to_chain(self,vg):
         mv_head,mv_deprel = vg.main_verb.head, vg.main_verb.deprel
-        vg.main_verb.head = vg.main_aux.ID
-        vg.main_verb.deprel = vg.main_aux.deprel
-        remaining_aux = [aux for aux in vg.aux_ids if aux is not vg.main_aux.ID]
-        #Warning: here I assume there's only one remaining aux
-        #TODO: fix it
-        outermost_remaining_aux = self.dg[remaining_aux[0]-1]
-        vg.main_aux.head = outermost_remaining_aux.ID
-        outermost_remaining_aux.head = mv_head
-        outermost_remaining_aux.deprel = mv_deprel
+        #change direction of dependency relation between main verb and closest aux
+        vg.main_verb.head = vg.closest_aux.ID
+        vg.main_verb.deprel = vg.closest_aux.deprel
+        #head of main verb becomes head of outermost aux
+        vg.outermost_aux.head = mv_head
+        vg.outermost_aux.deprel = mv_deprel
+        #TODO: this needs to be sanity checked
+        #remaining aux: a chain from the outermost to the main verb
+        #main verb is to the right
+        if vg.outermost_aux.ID < vg.main_verb.ID:
+            for i,aux in enumerate(vg.aux_ids[1:]):
+                self.dg[aux-1].head = vg.aux_ids[i-1]
+        #main verb to the left
+        else:
+            for i,aux in enumerate(vg.aux_ids[-2::-1]):
+                self.dg[aux-1].head = vg.aux_ids[i+1]
 
     def projectivize(self,vg):
+        #TODO: rename? Joakim mentioned that this was not the only goal of
+        #moving dependents, at least in his 06 paper
         deps = self.dg.get_dependents(vg.main_verb)
         for dep in deps:
             if dep.is_to_the_left_of(vg.leftmost_verb):
@@ -214,4 +238,4 @@ class VGtransformer(TreeTransformer):
             elif dep.is_to_the_right_of(vg.rightmost_verb):
                 dep.head = vg.rightmost_verb.ID
             else:
-                dep.head = vg.main_aux.ID
+                dep.head = vg.closest_aux.ID
