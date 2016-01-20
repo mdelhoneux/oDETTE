@@ -38,6 +38,9 @@ class DependencyGraph(list):
     def get_right_dependents(self,word):
         return [dep for dep in self if (dep.ID > word.ID) and (dep.head == word.ID)]
 
+    def head_is_to_the_right(self,dep):
+        return dep.ID < dep.head
+
     def has_cop_deprel(self):
         for dep in self:
             if dep.deprel == "cop":
