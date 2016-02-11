@@ -11,7 +11,7 @@
 
 
 import sys
-from src.treebank_transformer import TreebankTransformer
+from odette.src.treebank_transformer import TreebankTransformer
 import config
 
 #TODO: generalize this instead of working directly on auxiliaries

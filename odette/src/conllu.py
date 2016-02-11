@@ -9,14 +9,16 @@
 #==============================================================================
 
 
-from src.dependency import Dependency
-from src.dependency_graph import DependencyGraph
+from odette.src.dependency import Dependency
+from odette.src.dependency_graph import DependencyGraph
 
 conllu = ["ID", "form", "lemma", "cpostag", "postag", "feats", "head", "deprel",
           "deps", "misc"]
 
 conllx = ["ID", "form", "lemma", "cpostag", "postag", "feats", "head", "deprel",
           "phead", "pdeprel"]
+
+malttab = ["form", "postag", "head", "deprel"]
 
 class ConllFileHandler():
     def __init__(self,conll=conllu,separator="\t"):
@@ -78,13 +80,35 @@ class ConllFileHandler():
             f.write("\n")
         f.close()
 
+class MaltTabReader(ConllFileHandler):
+    def __init__(self, *args, **kwargs):
+        super(MaltTabReader,self,*args,**kwargs).__init__()
+        self.conll = malt
+
+    def dep_graphs_to_file(self,filename, dependency_graphs):
+        f=open(filename,'w')
+        for dg in dependency_graphs:
+            for i,dep in enumerate(dg):
+                dep.ID = i
+                for el in conllu:
+                    if el not in dep:
+                        setattr(dep,el, "-")
+                f.write(dep.__str__())
+            f.write("\n")
+        f.close()
+
 
 def test_read():
-    cn = ConllFileHandler()
-    infile = './test_mult.conll'
+    import difflib
+    #cn = ConllFileHandler()
+    cn = MaltTabReader()
+    infile = 'test.tab'
     dgs = cn.file_to_dg_list(infile)
     out = './sanitytest.conll'
     cn.dep_graphs_to_file(out, dgs)
+    diff = difflib.ndiff(infile.readlines(), out.readlines())
+    delta = ''.join(x[2:] for x in diff if x.startswith('- '))
+    print delta
 
 if __name__ =="__main__":
     test_read()

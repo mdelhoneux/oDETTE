@@ -10,9 +10,9 @@
 #==============================================================================
 
 
-from src.conllu import ConllFileHandler
-from src.tree_transformer import VGtransformer
-from src.parsers import MaltParser
+from odette.src.conllu import ConllFileHandler
+from odette.src.tree_transformer import VGtransformer
+from odette.src.parsers import MaltParser
 import config
 
 class TreebankTransformer():

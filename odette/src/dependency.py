@@ -7,7 +7,6 @@
 #description	:dependency relation of a DependencyGraph object
 #Python version :2.7.6
 #==============================================================================
-import conllu
 
 class Dependency(object):
     """

@@ -12,8 +12,8 @@
 
 import sys
 import config
-from src.malteval import Malteval
-from src.treebank_transformer import TreebankTransformer
+from odette.src.malteval import Malteval
+from odette.src.treebank_transformer import TreebankTransformer
 
 malteval = Malteval()
 

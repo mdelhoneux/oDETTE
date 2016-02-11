@@ -11,7 +11,7 @@
 
 
 import sys
-from src.treebank_transformer import TreebankTransformer
+from odette.src.treebank_transformer import TreebankTransformer
 
 if __name__=="__main__":
     infile = sys.argv[1]

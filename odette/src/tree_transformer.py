@@ -10,8 +10,8 @@
 #==============================================================================
 
 
-from src.dependency_graph import DependencyGraph
-from src.verbgroup import VerbGroup, VerbGroupMS
+from odette.src.dependency_graph import DependencyGraph
+from odette.src.verbgroup import VerbGroup, VerbGroupMS
 
 class TreeTransformer(object):
     def __init__(self,tree, pos_style="ud", *args,**kwargs):
