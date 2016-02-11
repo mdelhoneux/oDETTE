@@ -20,7 +20,7 @@ conllx = ["ID", "form", "lemma", "cpostag", "postag", "feats", "head", "deprel",
 
 malttab = ["form", "postag", "head", "deprel"]
 
-class ConllFileHandler():
+class ConllFileHandler(object):
     def __init__(self,conll=conllu,separator="\t"):
         """Input: list of index labels (conllu default)"""
         self.conll = dict(enumerate(conllu))
@@ -82,16 +82,17 @@ class ConllFileHandler():
 
 class MaltTabReader(ConllFileHandler):
     def __init__(self, *args, **kwargs):
-        super(MaltTabReader,self,*args,**kwargs).__init__()
-        self.conll = malt
+        super(MaltTabReader,self).__init__(*args,**kwargs)
+        self.conll = malttab
 
     def dep_graphs_to_file(self,filename, dependency_graphs):
         f=open(filename,'w')
         for dg in dependency_graphs:
             for i,dep in enumerate(dg):
                 dep.ID = i
+                dep.cpostag = dep.postag
                 for el in conllu:
-                    if el not in dep:
+                    if not hasattr(dep, el):
                         setattr(dep,el, "-")
                 f.write(dep.__str__())
             f.write("\n")
@@ -104,11 +105,8 @@ def test_read():
     cn = MaltTabReader()
     infile = 'test.tab'
     dgs = cn.file_to_dg_list(infile)
-    out = './sanitytest.conll'
+    out = './test.conll'
     cn.dep_graphs_to_file(out, dgs)
-    diff = difflib.ndiff(infile.readlines(), out.readlines())
-    delta = ''.join(x[2:] for x in diff if x.startswith('- '))
-    print delta
 
 if __name__ =="__main__":
     test_read()
