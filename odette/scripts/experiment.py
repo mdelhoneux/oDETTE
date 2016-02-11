@@ -21,12 +21,15 @@ def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
     #TODO: have options for what goes in table
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankTransformer(treebank_name=treebank_name,use_cpostag=use_cpostag, pos_style=pos_style)
-    TM.transform_parse_detransform()
+    #TODO: optionalize
+    TM.transform_parse_detransform() #if you just want the eval you can just comment this out
 
     """FILES"""
     test_gold = TM.testfile
     parsed_baseline = outdir +  'dev_parsed_baseline.conll'
+    #TODO: make this an option
     parsed_ud = TM.parsed_ud
+    #parsed_ud = outdir + 'dev_parsed.ud.conll'
 
     """RESULTS"""
     buas, blas= malteval.accuracy(test_gold,parsed_baseline)
