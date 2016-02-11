@@ -12,10 +12,10 @@
 
 import sys, os
 import config
-from odette.src.malteval import Malteval
-from odette.src.parsers import MaltParser
-from odette.src.treebank_transformer import TreebankTransformer
-from odette.src.UD_treebank import UDtreebank
+from src.malteval import Malteval
+from src.parsers import MaltParser
+from src.treebank_transformer import TreebankTransformer
+from src.UD_treebank import UDtreebank
 
 def run_baseline(treebank_name, use_cpostag=False,outdir=None, trainfile=None,
                  testfile=None, ambig="orig", pos_style="ud"):

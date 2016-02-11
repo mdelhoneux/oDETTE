@@ -9,8 +9,8 @@
 #==============================================================================
 
 
-from odette.src.dependency import Dependency
-from odette.src.dependency_graph import DependencyGraph
+from src.dependency import Dependency
+from src.dependency_graph import DependencyGraph
 
 conllu = ["ID", "form", "lemma", "cpostag", "postag", "feats", "head", "deprel",
           "deps", "misc"]
