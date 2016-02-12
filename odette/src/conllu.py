@@ -69,7 +69,7 @@ class ConllFileHandler(object):
                     setattr(dep, col, dep_dict[col])
                     setattr(dep, 'split_word', True)
             else:
-                    setattr(dep, col, dep_dict[col])
+                setattr(dep, col, dep_dict[col])
         return dep
 
     def dep_graphs_to_file(self,filename,dependency_graphs):
@@ -89,18 +89,17 @@ class MaltTabReader(ConllFileHandler):
         f=open(filename,'w')
         for dg in dependency_graphs:
             for i,dep in enumerate(dg):
-                dep.ID = i
+                dep.ID = i + 1
                 dep.cpostag = dep.postag
                 for el in conllu:
                     if not hasattr(dep, el):
-                        setattr(dep,el, "-")
+                        setattr(dep,el, "_")
                 f.write(dep.__str__())
             f.write("\n")
         f.close()
 
 
 def test_read():
-    import difflib
     #cn = ConllFileHandler()
     cn = MaltTabReader()
     infile = 'test.tab'
@@ -109,4 +108,12 @@ def test_read():
     cn.dep_graphs_to_file(out, dgs)
 
 if __name__ =="__main__":
-    test_read()
+    import sys
+    #convert malt to conllx
+    #TODO: this should not be done here 
+    #could come as option in transform_file
+    cn = MaltTabReader()
+    infile = sys.argv[1]
+    outfile = sys.argv[2]
+    dgs = cn.file_to_dg_list(infile)
+    cn.dep_graphs_to_file(outfile, dgs)
