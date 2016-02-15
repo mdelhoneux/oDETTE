@@ -10,7 +10,7 @@
 #==============================================================================
 
 
-from src.conllu import ConllFileHandler
+from src.conllu import ConllFileHandler, MaltTabReader
 from src.tree_transformer import VGtransformer
 from src.parsers import MaltParser
 import config
