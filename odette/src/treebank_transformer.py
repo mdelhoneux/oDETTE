@@ -13,6 +13,7 @@
 from src.conllu import ConllFileHandler, MaltTabReader
 from src.tree_transformer import VGtransformer
 from src.parsers import MaltParser
+from src.utils import dict_count_to_freq
 import config
 
 class TreebankTransformer():
@@ -68,6 +69,18 @@ class TreebankTransformer():
             transform.transform()
             n_aux += transform.tot_aux
         return n_aux, n_tokens, len(dgs_in)
+
+    def collect_vg_postags(self,infile):
+        aux_pos = {}
+        main_verbs_pos = {}
+        dgs_in = self._file_handler.file_to_dg_list(infile)
+        for dg in dgs_in:
+            transform = VGtransformer(dg, pos_style=self._pos_style)
+            transform.add_vg_pos_information(aux_pos, main_verbs_pos)
+        main_verbs_pos = dict_count_to_freq(main_verbs_pos)
+        aux_pos = dict_count_to_freq(aux_pos)
+        return main_verbs_pos, aux_pos
+
 
     def transform(self, infile, outfile, transformation):
         dgs_in = self._file_handler.file_to_dg_list(infile)

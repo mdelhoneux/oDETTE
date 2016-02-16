@@ -21,6 +21,8 @@ class Parser(object):
         raise NotImplementedError
 
 class MaltParser(Parser):
+    #TODO: redecrease java heap size after running PDT
+    #TODO: also unpack more options
     def __init__(self, path_to_malt=config.maltparser, name=None):
         self._path_to_malt = path_to_malt
         if not name: name = "parser"

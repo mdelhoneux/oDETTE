@@ -56,6 +56,20 @@ class VGtransformer(TreeTransformer):
         self.tot_aux = 0
         super(VGtransformer, self).__init__(*args, **kwargs)
 
+    def add_vg_pos_information(self, aux_pos, main_verbs_pos):
+        """Update a dictionary adding counts of aux and main verb pos tags"""
+        VGs = self.find_vgs_in_ud()
+        for vg in VGs:
+            if vg.main_verb.postag not in main_verbs_pos:
+                main_verbs_pos[vg.main_verb.postag] = 0
+            main_verbs_pos[vg.main_verb.postag] += 1
+            for aux_id in vg.aux_ids:
+                aux = self.dg[aux_id - 1].postag
+                if aux not in aux_pos:
+                    aux_pos[aux] = 0
+                aux_pos[aux] = 1
+
+
     def disambiguate_vg_postags(self):
         VGs = self.find_vgs_in_ud()
         for vg in VGs:
@@ -132,6 +146,7 @@ class VGtransformer(TreeTransformer):
         Input: dependency graph
         output: list of verb group objects
         """
+        #TODO: I might want to rename that since I use it for PDT
         VGs = []
         main_verbs = []
         vg = VerbGroup()
@@ -205,9 +220,6 @@ class VGtransformer(TreeTransformer):
 
     def save_vg(self,vg,VGs):
         if len(vg.aux_ids) > 0:
-            #used those to check the pos tags in slov
-            #aux_pos = [self.dg[i-1].postag for i in vg.aux_ids]
-            #print "%s;"%vg.main_verb.postag + ";".join(aux_pos)
             vg.aux_ids.sort()
             vg.rightmost_verb = self.dg[max(vg.aux_ids[-1],vg.main_verb.ID) - 1]
             vg.leftmost_verb = self.dg[min(vg.aux_ids[0],vg.main_verb.ID) - 1]

@@ -54,3 +54,10 @@ extra = {
     }
 
 v1_2 = dict(v1_1.items() + extra.items())
+
+def dict_count_to_freq(d):
+    """Turns dictionary of counts to dictionary of frequencies"""
+    tot_d = sum(d.values())
+    for val in d:
+        d[val] /= float(tot_d)
+    return d
