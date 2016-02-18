@@ -17,5 +17,7 @@ if __name__=="__main__":
     infile = sys.argv[1]
     out = sys.argv[2]
     change = sys.argv[3]
-    TM = TreebankTransformer()
+    #TODO: make this an option
+    pos_style = 'sdt'
+    TM = TreebankTransformer(pos_style=pos_style)
     TM.transform(infile,out,change)
