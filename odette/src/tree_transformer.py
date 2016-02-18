@@ -67,7 +67,7 @@ class VGtransformer(TreeTransformer):
                 aux = self.dg[aux_id - 1].postag
                 if aux not in aux_pos:
                     aux_pos[aux] = 0
-                aux_pos[aux] = 1
+                aux_pos[aux] += 1
 
 
     def disambiguate_vg_postags(self):
