@@ -18,7 +18,7 @@ import config
 
 class TreebankTransformer():
     def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), transformer="vg",
-                 parser="malt", outdir=None, pos_style="ud", use_cpostag=False):
+                 parser="malt", outdir=None, dep_style="ud", pos_style='ud',use_cpostag=False):
         #TODO: ouch this is ugly
         if not outdir:
             if not treebank_name:
@@ -37,6 +37,7 @@ class TreebankTransformer():
         self.use_cpostag = use_cpostag
         self.trainfile = "%strain.conll"%self.outdir
         self.testfile = "%stest_gold.conll"%self.outdir
+        self._dep_style = dep_style
         self._pos_style = pos_style
 
     def init_files_for_transformation(self):
@@ -65,7 +66,7 @@ class TreebankTransformer():
         dgs_in = self._file_handler.file_to_dg_list(infile)
         for dg in dgs_in:
             n_tokens += len(dg)
-            transform = VGtransformer(dg, pos_style=self._pos_style)
+            transform = VGtransformer(dg, dep_style=self._dep_style)
             transform.transform()
             n_aux += transform.tot_aux
         return n_aux, n_tokens, len(dgs_in)
@@ -75,19 +76,18 @@ class TreebankTransformer():
         main_verbs_pos = {}
         dgs_in = self._file_handler.file_to_dg_list(infile)
         for dg in dgs_in:
-            transform = VGtransformer(dg, pos_style=self._pos_style)
+            transform = VGtransformer(dg, dep_style=self._dep_style)
             transform.add_vg_pos_information(aux_pos, main_verbs_pos)
         main_verbs_pos = dict_count_to_freq(main_verbs_pos)
         aux_pos = dict_count_to_freq(aux_pos)
         return main_verbs_pos, aux_pos
-
 
     def transform(self, infile, outfile, transformation):
         dgs_in = self._file_handler.file_to_dg_list(infile)
         dgs_out = []
         for dg in dgs_in:
             if self._transformer == "vg":
-                transform = VGtransformer(dg, pos_style=self._pos_style)
+                transform = VGtransformer(dg, dep_style=self._dep_style)
             else:
                 raise Exception, "Invalid transformation"
             if transformation == "transform":

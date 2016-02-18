@@ -62,13 +62,13 @@ class DependencyGraph(list):
             if use_cpostag:
                 dep.postag = dep.cpostag
 
-    def make_verbs_ambiguous(self, pos_style="ud"):
+    def make_verbs_ambiguous(self, dep_style="ud"):
         for dep in self:
-            if pos_style == "ud":
+            if dep_style == "ud":
                 if dep.cpostag == "AUX":
                     dep.cpostag = "VERB"
                 dep.postag = dep.cpostag
-            elif pos_style == "sdt":
+            elif dep_style == "pdt":
                 pos = dep.postag.split("-")
                 if len(pos) >1:
                     if pos[0] == "Verb":

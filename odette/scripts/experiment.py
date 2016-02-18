@@ -17,11 +17,11 @@ from src.treebank_transformer import TreebankTransformer
 
 malteval = Malteval()
 
-def run_experiment(treebank_name,outdir=None,use_cpostag=False, pos_style="ud"):
+def run_experiment(treebank_name,outdir=None,use_cpostag=False, dep_style="ud", pos_style='ud'):
     #TODO: have options for what goes in table
     if not outdir: outdir= config.exp + treebank_name + "/"
-    TM = TreebankTransformer(treebank_name=treebank_name,use_cpostag=use_cpostag, pos_style=pos_style)
-    #import ipdb; ipdb.set_trace()
+    TM = TreebankTransformer(treebank_name=treebank_name,use_cpostag=use_cpostag,
+                        dep_style=dep_style, pos_style=pos_style)
     #TODO: optionalize
     TM.transform_parse_detransform() #if you just want the eval you can just comment this out
 
@@ -87,12 +87,15 @@ def check_non_projectivity(treebank_name,outdir=None):
 
 if __name__=="__main__":
     treebank_name = sys.argv[1]
-    pos_style = "ud"
+    dep_style = "ud"
+    pos_style = 'ud'
     ambig = "orig"
     if len(sys.argv) > 2:
-        pos_style = sys.argv[2]
-        ambig = sys.argv[3]
+        dep_style = sys.argv[2]
+        pos_style = sys.argv[3]
+        ambig = sys.argv[4]
     res = open('exp_results_%s_%s.csv'%(treebank_name, ambig), "w")
     res.write("treebank_name;baseline LAS; transformed LAS\n")
-    output = run_experiment(treebank_name, use_cpostag=True,pos_style=pos_style)
+    output = run_experiment(treebank_name, use_cpostag=True,dep_style=dep_style,
+                            pos_style=pos_style)
     res.write(output)

@@ -7,7 +7,15 @@
 #Python version :2.7.6
 #==============================================================================
 
+"""FUNCTIONS"""
+def dict_count_to_freq(d):
+    """Turns dictionary of counts to dictionary of frequencies"""
+    tot_d = sum(d.values())
+    for val in d:
+        d[val] /= float(tot_d)
+        return d
 
+"""OTHER"""
 #ISO codes of different versions
 v1_1 = {
      'UD_German': 'de',
@@ -55,9 +63,21 @@ extra = {
 
 v1_2 = dict(v1_1.items() + extra.items())
 
-def dict_count_to_freq(d):
-    """Turns dictionary of counts to dictionary of frequencies"""
-    tot_d = sum(d.values())
-    for val in d:
-        d[val] /= float(tot_d)
-    return d
+pos_disambig = {
+    #TODO: maybe these are not the best choices
+    'ud':
+    {
+        'main_verb':'VERB',
+        'auxiliary':'AUX'
+    },
+    'sdt':
+    {
+        'main_verb':'Verb-main',
+        'auxiliary':'Verb-copula'
+    },
+    'pdt':
+    {
+        'main_verb':'Vp',
+        'auxiliary':'Vc'
+    }
+}

@@ -14,9 +14,10 @@ from src.dependency_graph import DependencyGraph
 from src.verbgroup import VerbGroup, VerbGroupMS
 
 class TreeTransformer(object):
-    def __init__(self,tree, pos_style="ud", *args,**kwargs):
+    def __init__(self,tree, dep_style="ud", pos_style='ud', *args,**kwargs):
         self.dg = tree
-        self._pos_style = pos_style #to determine what is an auxiliary dependency
+        self._dep_style = dep_style #to determine what is an auxiliary dependency
+        self._pos_style = pos_style
         super(TreeTransformer,self).__init__(*args,**kwargs)
 
     def transform(self):
@@ -69,19 +70,13 @@ class VGtransformer(TreeTransformer):
                     aux_pos[aux] = 0
                 aux_pos[aux] += 1
 
-
     def disambiguate_vg_postags(self):
+        from src.utils import pos_disambig
         VGs = self.find_vgs_in_ud()
         for vg in VGs:
-            if self._pos_style == "ud":
-                vg.main_verb.postag = "VERB"
-            elif self._pos_style == "sdt":
-                vg.main_verb.postag = "Verb-main"
+            vg.main_verb.postag = pos_disambig[self._pos_style]['main_verb']
             for i in vg.aux_ids:
-                if self._pos_style == "ud":
-                    self.dg[i-1].postag = "AUX"
-                elif self._pos_style == "sdt":
-                    self.dg[i-1].postag = "Verb-copula"
+                self.dg[i-1].postag = pos_disambig[self._pos_style]['auxiliary']
 
     def transform(self):
         """
@@ -118,17 +113,17 @@ class VGtransformer(TreeTransformer):
                 self.move_dependents(self.dg[aux-1],vg.main_verb)
 
     def is_aux_dependency(self,dep):
-        if self._pos_style == "ud":
+        if self._dep_style == "ud":
             return self.is_aux_dependency_in_ud(dep)
-        elif self._pos_style == "sdt":
-            return self.is_aux_dependency_in_sdt(dep)
+        elif self._dep_style == "pdt":
+            return self.is_aux_dependency_in_pdt(dep)
 
     def is_aux_dependency_in_ud(self,dep):
         """Only auxiliary dependencies between verbal forms (aux or verb) are considered"""
         aux_tags = ["AUX", "VERB"]
         return ((dep.deprel == "aux") and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
 
-    def is_aux_dependency_in_sdt(self,dep):
+    def is_aux_dependency_in_pdt(self,dep):
         return (dep.deprel == "AuxV")
 
     def is_head_of_aux_dependency(self,dependency):

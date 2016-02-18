@@ -15,9 +15,9 @@ from src.treebank_transformer import TreebankTransformer
 import config
 
 #TODO: generalize this instead of working directly on auxiliaries
-def run_stats(treebank_name,outdir=None,trainfile=None, testfile=None,pos_style="ud"):
+def run_stats(treebank_name,outdir=None,trainfile=None, testfile=None,dep_style="ud"):
     if not outdir: outdir= config.exp + treebank_name
-    TM = TreebankTransformer(treebank_name=treebank_name, pos_style=pos_style)
+    TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style)
     #replace train and test files if they are given as arg
     if trainfile: TM.trainfile = trainfile
     if testfile: TM.testfile = testfile
@@ -34,11 +34,11 @@ if __name__=="__main__":
     treebank_name = sys.argv[1]
     train = sys.argv[2]
     test = sys.argv[3]
-    pos_style = "ud"
+    dep_style = "ud"
     if len(sys.argv) > 4:
-        pos_style = sys.argv[4]
+        dep_style = sys.argv[4]
     res = open('stats_%s.csv'%(treebank_name), "w")
     res.write("treebank_name;n sentences;n tokens; aux frequency\n")
     output=run_stats(treebank_name,res,trainfile=train,testfile=test,
-                     pos_style=pos_style)
+                     dep_style=dep_style)
     res.write(output)
