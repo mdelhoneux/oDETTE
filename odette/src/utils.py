@@ -13,7 +13,7 @@ def dict_count_to_freq(d):
     tot_d = sum(d.values())
     for val in d:
         d[val] /= float(tot_d)
-        return d
+    return d
 
 """OTHER"""
 #ISO codes of different versions
