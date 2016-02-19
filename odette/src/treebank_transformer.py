@@ -18,7 +18,7 @@ import config
 
 class TreebankTransformer():
     def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), transformer="vg",
-                 parser="malt", outdir=None, dep_style="ud", pos_style='ud',use_cpostag=False):
+                 parser="malt", outdir=None, dep_style="ud", pos_style='ud'):
         #TODO: ouch this is ugly
         if not outdir:
             if not treebank_name:
@@ -34,7 +34,6 @@ class TreebankTransformer():
         self.treebank_name = treebank_name
         self._file_handler = file_handler
         self._transformer=transformer
-        self.use_cpostag = use_cpostag
         self.trainfile = "%strain.conll"%self.outdir
         self.testfile = "%stest_gold.conll"%self.outdir
         self._dep_style = dep_style
@@ -87,7 +86,7 @@ class TreebankTransformer():
         dgs_out = []
         for dg in dgs_in:
             if self._transformer == "vg":
-                transform = VGtransformer(dg, dep_style=self._dep_style)
+                transform = VGtransformer(dg, dep_style=self._dep_style,pos_style=self._pos_style)
             else:
                 raise Exception, "Invalid transformation"
             if transformation == "transform":
@@ -97,9 +96,9 @@ class TreebankTransformer():
             elif transformation == "disambig":
                 transform.disambiguate_vg_postags()
             elif transformation == "ambig":
-                dg.make_verbs_ambiguous()
+                dg.make_verbs_ambiguous(pos_style=self._pos_style)
             elif transformation == "to_conllx":
-                dg.to_conllx(self.use_cpostag)
+                dg.to_conllx()
             else:
                 raise Exception, "Invalid transformation"
             dgs_out.append(dg)

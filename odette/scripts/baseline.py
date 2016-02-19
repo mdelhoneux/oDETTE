@@ -17,7 +17,7 @@ from src.parsers import MaltParser
 from src.treebank_transformer import TreebankTransformer
 from src.UD_treebank import UDtreebank
 
-def run_baseline(treebank_name, use_cpostag=False,outdir=None, trainfile=None,
+def run_baseline(treebank_name, outdir=None, trainfile=None,
                  testfile=None, ambig="orig", dep_style="ud", pos_style='ud'):
     if not outdir: outdir= config.exp + treebank_name
     if not os.path.exists(outdir): os.mkdir(outdir)
@@ -27,7 +27,7 @@ def run_baseline(treebank_name, use_cpostag=False,outdir=None, trainfile=None,
         trainfile = tb.trainfile
         testfile = tb.devfile
     TM = TreebankTransformer(treebank_name=treebank_name,
-                             use_cpostag=use_cpostag, dep_style=dep_style,
+                             dep_style=dep_style,
                              pos_style=pos_style)
     TM.transform(trainfile, TM.trainfile, 'to_conllx')
     TM.transform(testfile, TM.testfile, 'to_conllx')
@@ -70,5 +70,5 @@ if __name__=="__main__":
     res = open('baseline_results_%s_%s.csv'%(treebank_name,ambig), "w")
     res.write("treebank_name;LAS;UAS\n")
     output = run_baseline(treebank_name,trainfile=train,testfile=test,ambig=ambig,dep_style=dep_style,
-                 use_cpostag=True, pos_style=pos_style)
+                 pos_style=pos_style)
     res.write(output)

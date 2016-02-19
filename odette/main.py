@@ -21,15 +21,15 @@ from scripts.baseline import run_baseline
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
 from scripts.collect_stats import run_stats
 
-def run(language, exp_type, use_cpostag=False):
+def run(language, exp_type):
     language_dir = config.exp + language
     if not os.path.exists(language_dir):
         os.mkdir(language_dir)
     language_dir += "/"
     if exp_type == "baseline":
-        return run_baseline(language,outdir=language_dir, use_cpostag=use_cpostag)
+        return run_baseline(language,outdir=language_dir)
     elif exp_type =="exp":
-        return run_experiment(language,outdir=language_dir, use_cpostag=use_cpostag)
+        return run_experiment(language,outdir=language_dir)
     elif exp_type == "stats":
         return run_stats(language,outdir=language_dir)
     elif exp_type == "ms_gold":
@@ -73,7 +73,6 @@ if __name__=="__main__":
     arg_parser.add_argument('--version', default = 'v1_2', help='[v1_1|v1_2] The version of UD.  Default = v1_2 which corresponds to v1.2. Note: The version needs to contain a iso dictionary in utils ')
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in included)")
-    arg_parser.add_argument('--use_cpostag', default = 1, help="[1 for True|0 for False] Use the cpostag instead of the postag for parsing. Default = 1")
     arg_parser.add_argument('--parallel', default = 1, help="[1 for True|0 for False] Run everything in parallel. Default = 1.")
 
     args = arg_parser.parse_args()
@@ -81,7 +80,6 @@ if __name__=="__main__":
 
     res = open(args['outfile'], "w")
     exp_type = args['exp_type']
-    use_cpostag = bool(int(args['use_cpostag']))
     parallel = bool(int(args['parallel']))
     version = args['version']
     exec("langs = src.utils.%s"%version) #put iso_code in langs
@@ -100,13 +98,13 @@ if __name__=="__main__":
     if parallel:
         #run everything in parallel
         num_cores = multiprocessing.cpu_count()
-        results = Parallel(n_jobs=num_cores)(delayed(run)(language,exp_type,use_cpostag=use_cpostag) for language in l_considered)
+        results = Parallel(n_jobs=num_cores)(delayed(run)(language,exp_type) for language in l_considered)
         for result in results:
             res.write(result)
     else:
-        #results = [run(language,exp_type,use_cpostag=use_cpostag) for language in l_considered]
+        #results = [run(language,exp_type) for language in l_considered]
         for i, language in enumerate(l_considered):
             print "working on " + language + " (%s/%s)"%(i,len(l_considered))
-            lres = run(language,exp_type,use_cpostag=use_cpostag)
+            lres = run(language,exp_type)
             res.write(lres)
             res.flush()

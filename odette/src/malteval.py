@@ -19,9 +19,10 @@ class Malteval(object):
     def __init__(self, location=config.malteval):
         self._location = location
 
-    def accuracy(self,gold,test, exclude_punct=True):
+    def accuracy(self,gold,test, exclude_punct=False):
         """UAS and LAS of test on gold"""
         #TODO: expose the exclude_deprel elsewhere
+        #TODO: maybe change the default
         cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --row-header 0 --tab 1 --header-info 0 --Metric 'LAS;UAS'"%(self._location,gold,test)
         if exclude_punct:
             cmd += " --ExcludeDeprels 'punct'"

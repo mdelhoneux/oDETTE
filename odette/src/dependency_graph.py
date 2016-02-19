@@ -10,6 +10,8 @@
 
 
 import os
+import config
+
 class DependencyGraph(list):
     """
     A dependency graph is a list of dependency relations in conll format
@@ -47,11 +49,10 @@ class DependencyGraph(list):
                 return True
         return False
 
-    def to_conllx(self, use_cpostag=False):
+    def to_conllx(self):
         """
         make sure last two columns are underscore and postag is not empty
         if it is replace it with cpostag
-        @parameter: use_cpostag: to replace postag with cpostag for parsing
         """
         self.remove_split_words()
         for dep in self:
@@ -59,20 +60,27 @@ class DependencyGraph(list):
             dep.misc = "_"
             if dep.postag == "_":
                 dep.postag = dep.cpostag
-            if use_cpostag:
+            #for using the cpostag for parsing
+            if config.USE_CPOSTAG:
                 dep.postag = dep.cpostag
 
-    def make_verbs_ambiguous(self, dep_style="ud"):
+    def make_verbs_ambiguous(self, pos_style="ud"):
+        #TODO: write it for sdt
         for dep in self:
-            if dep_style == "ud":
+            if pos_style == "ud":
                 if dep.cpostag == "AUX":
                     dep.cpostag = "VERB"
+                #TODO: this is a bit confusing
                 dep.postag = dep.cpostag
-            elif dep_style == "pdt":
+            elif pos_style == "sdt":
                 pos = dep.postag.split("-")
                 if len(pos) >1:
                     if pos[0] == "Verb":
                         dep.postag = "Verb"
+            elif pos_style == 'pdt':
+                if dep.postag[0] == "V":
+                    dep.postag = "V"
+
 
     def closest_to(self,wordlist,main_word):
         """Find the word in the wordlist that is closest to the main word"""
