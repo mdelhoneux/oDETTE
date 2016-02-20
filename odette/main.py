@@ -17,9 +17,14 @@ import multiprocessing
 
 import config
 import src.utils
+from scripts.preprocess_files import prepare_files
 from scripts.baseline import run_baseline
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
 from scripts.collect_stats import run_stats
+
+#TODO: prepare file does not need to write to any file
+#right now I quite inelegantly write empty strings to files but should do
+#something better
 
 def run(language, exp_type):
     language_dir = config.exp + language
@@ -28,6 +33,9 @@ def run(language, exp_type):
     language_dir += "/"
     if exp_type == "baseline":
         return run_baseline(language,outdir=language_dir)
+    elif exp_type == "prep":
+        prepare_files(language,outdir=language_dir)
+        return ""
     elif exp_type =="exp":
         return run_experiment(language,outdir=language_dir)
     elif exp_type == "stats":
@@ -42,6 +50,8 @@ def run(language, exp_type):
         raise Exception, "Invalid exp_type"
 
 def table_headers(exp_type):
+    if exp_type == "prep":
+        return ""
     if exp_type == "baseline":
         return "language;LAS;UAS\n"
     elif exp_type =="exp":
@@ -69,7 +79,7 @@ if __name__=="__main__":
     #TODO: add stdout messages and maybe nohup the parsing stuff out
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--outfile', default = './results.csv', help='A file name, it will contain the results: Default: results.csv in current directory')
-    arg_parser.add_argument('--exp_type', default = 'baseline', help='[baseline|exp|stats|ms_gold|non_proj|backtransf] Type of experiment to carry. Default: run all baselines.  stats: count sentences, tokens and auxiliaries. exp: run experiment (warning: the baselines must have been run).  ms_gold: evaluate on transformed rep (warning: experiment must have been run before).  non_proj: counts non-projectivity in gold, transformed and backtransformed training data.  backtransf: test the accuracy of the backtransformation on the training files')
+    arg_parser.add_argument('--exp_type', default = 'baseline', help='[prep|baseline|exp|stats|ms_gold|non_proj|backtransf] Type of experiment to carry. Default: run all baselines.  prep: preprocess files, stats: count sentences, tokens and auxiliaries. exp: run experiment.  ms_gold: evaluate on transformed rep (warning: experiment must have been run before).  non_proj: counts non-projectivity in gold, transformed and backtransformed training data.  backtransf: test the accuracy of the backtransformation on the training files')
     arg_parser.add_argument('--version', default = 'v1_2', help='[v1_1|v1_2] The version of UD.  Default = v1_2 which corresponds to v1.2. Note: The version needs to contain a iso dictionary in utils ')
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in included)")
