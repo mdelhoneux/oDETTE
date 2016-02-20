@@ -20,16 +20,15 @@ malteval = Malteval()
 def run_experiment(treebank_name,outdir=None,dep_style="ud", pos_style='ud'):
     #TODO: have options for what goes in table
     if not outdir: outdir= config.exp + treebank_name + "/"
-    TM = TreebankTransformer(treebank_name=treebank_name,
-                        dep_style=dep_style, pos_style=pos_style)
+    TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style, pos_style=pos_style)
     #TODO: optionalize
     TM.transform_parse_detransform() #if you just want the eval you can just comment this out
 
     """FILES"""
     test_gold = TM.testfile
     parsed_baseline = outdir +  'dev_parsed_baseline.conll'
-    #TODO: make this an option
     parsed_ud = TM.parsed_ud
+    #if you just eval comment the one up and uncomment the one down
     #parsed_ud = outdir + 'dev_parsed.ud.conll'
 
     """RESULTS"""
@@ -86,10 +85,11 @@ def check_non_projectivity(treebank_name,outdir=None):
     return out
 
 if __name__=="__main__":
+    #usage: python experiment.py treebank_name (dep_stype, pos_style, ambig)
     treebank_name = sys.argv[1]
     dep_style = "ud"
     pos_style = 'ud'
-    ambig = "orig"
+    ambig = None
     if len(sys.argv) > 2:
         dep_style = sys.argv[2]
         pos_style = sys.argv[3]
