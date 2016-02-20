@@ -43,7 +43,7 @@ class ConllFileHandler(object):
                 if line in ('\n', '\r\n'):#blank lines are end of sentences
                     if config.KEEP_COP or not dg.has_cop_deprel():
                         dependency_graphs.append(dg)#retrieve the dg 
-                        dg = DependencyGraph()#reinitialize
+                    dg = DependencyGraph() #reinitialize
                 else:
                     line = line.strip("\n")
                     dep = self.line_to_dependency(line, separator)
