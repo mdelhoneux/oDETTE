@@ -1,16 +1,17 @@
 import os
+import config
 from src.treebank_transformer import TreebankTransformer
 from src.UD_treebank import UDtreebank
 
-def prepare_files(treebank_name, outdir=None, trainfile=None,
-                  testfile=None, ambig_type=None):
+def prepare_files(treebank_name, outdir=None, trainfile=None, testfile=None,
+                  ambig_type=None, dep_style='ud', pos_style='ud'):
     if not outdir: outdir= config.exp + treebank_name
     if not os.path.exists(outdir): os.mkdir(outdir)
     if not trainfile and not testfile :
         tb = UDtreebank(treebank_name)
         trainfile = tb.trainfile
         testfile = tb.devfile
-    TM = TreebankTransformer(treebank_name=treebank_name)
+    TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style)
     TM.transform(trainfile, TM.trainfile, 'to_conllx')
     TM.transform(testfile, TM.testfile, 'to_conllx')
 
@@ -21,11 +22,16 @@ def prepare_files(treebank_name, outdir=None, trainfile=None,
 
 if __name__=="__main__":
     """usage: python preprocess_files.py treebank_name trainfile testfile (ambig)"""
+    import sys
     treebank_name = sys.argv[1]
     train = sys.argv[2]
     test = sys.argv[3]
     ambig = None
+    dep_style ="ud"
+    pos_style ="ud"
     if len(sys.argv) > 4:
         ambig = sys.argv[4]
-    prepare_files(treebank_name,trainfile=train,testfile=test,dep_style=dep_style,
-                  pos_style=pos_style, ambig_type=ambig)
+        dep_style = sys.argv[5]
+        pos_style = sys.argv[6]
+    prepare_files(treebank_name,trainfile=train,testfile=test, ambig_type=ambig,
+                  dep_style=dep_style, pos_style=pos_style)
