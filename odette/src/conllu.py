@@ -11,6 +11,7 @@
 
 from src.dependency import Dependency
 from src.dependency_graph import DependencyGraph
+import config
 
 conllu = ["ID", "form", "lemma", "cpostag", "postag", "feats", "head", "deprel",
           "deps", "misc"]
@@ -110,7 +111,7 @@ if __name__ =="__main__":
     import sys
     #convert malt to conllx
     #TODO: this should not be done here 
-    #could come as option in transform_file
+    #should be an option in preprocess_files
     cn = MaltTabReader()
     infile = sys.argv[1]
     outfile = sys.argv[2]
