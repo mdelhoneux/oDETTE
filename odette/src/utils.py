@@ -55,8 +55,7 @@ extra = {
      'UD_Old_Church_Slavonic': 'cu',
      'UD_Ancient_Greek-PROIEL': 'grc_proiel',
      'UD_Tamil': 'ta',
-     'UD_Japanese-KTC':
-     'ja_ktc',
+     'UD_Japanese-KTC': 'ja_ktc',
      'UD_Portuguese': 'pt',
      'UD_Polish': 'pl'
     }

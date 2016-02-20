@@ -112,6 +112,7 @@ class VGtransformer(TreeTransformer):
                 #and get moved at the same time as other dependents
                 self.move_dependents(self.dg[aux-1],vg.main_verb)
 
+    #TODO: all this stuff does not really belong to tree transformer
     def is_aux_dependency(self,dep):
         if self._dep_style == "ud":
             return self.is_aux_dependency_in_ud(dep)

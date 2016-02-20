@@ -5,7 +5,8 @@ import sys
 def plot_f_dict(d, filename):
     plt.figure()
     plt.bar(range(len(d)), d.values(), align="center")
-    plt.xticks(range(len(d)), list(d.keys()))
+    plt.xticks(range(len(d)), list(d.keys()), rotation='vertical')
+    plt.subplots_adjust(bottom=0.15)
     plt.savefig(filename)
 
 if __name__=="__main__":
