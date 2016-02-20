@@ -70,6 +70,15 @@ class TreebankTransformer():
             n_aux += transform.tot_aux
         return n_aux, n_tokens, len(dgs_in)
 
+    def count_cop(self, infile):
+        """return n of aux n of tokens and n of sentences"""
+        n_cop = 0
+        dgs_in = self._file_handler.file_to_dg_list(infile)
+        for dg in dgs_in:
+            if dg.has_cop_deprel():
+                n_cop += 1
+        return n_cop, len(dgs_in)
+
     def collect_vg_postags(self,infile):
         aux_pos = {}
         main_verbs_pos = {}
