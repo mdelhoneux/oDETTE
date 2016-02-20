@@ -14,7 +14,7 @@ import sys
 from src.treebank_transformer import TreebankTransformer
 import config
 
-#TODO: generalize this instead of working directly on auxiliaries
+#TODO: a function that just counts tokens and sentences might be useful
 def run_stats(treebank_name,outdir=None,trainfile=None, testfile=None,dep_style="ud"):
     if not outdir: outdir= config.exp + treebank_name
     TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style)
@@ -28,6 +28,20 @@ def run_stats(treebank_name,outdir=None,trainfile=None, testfile=None,dep_style=
     tot_tokens = tot_train + tot_test
     aux_freq = (tot_aux/float(tot_tokens))*100
     output = "%s;%s;%s;%s\n"%(treebank_name, tot_s, tot_tokens, aux_freq)
+    return output
+
+def run_stats_cop(treebank_name,outdir=None,trainfile=None, testfile=None,dep_style="ud"):
+    if not outdir: outdir= config.exp + treebank_name
+    TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style)
+    #replace train and test files if they are given as arg
+    if trainfile: TM.trainfile = trainfile
+    if testfile: TM.testfile = testfile
+    cop_train, tot_train= TM.count_cop(TM.trainfile)
+    cop_test, tot_test= TM.count_cop(TM.testfile)
+    tot_cop = cop_train + cop_test
+    tot_s = tot_train + tot_test
+    cop_freq = (tot_cop/float(tot_s))*100
+    output = "%s;%s;%s\n"%(treebank_name, tot_s, cop_freq)
     return output
 
 if __name__=="__main__":
