@@ -17,8 +17,7 @@ from src.utils import dict_count_to_freq
 import config
 
 class TreebankTransformer():
-    def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), transformer="vg",
-                 parser="malt", outdir=None, dep_style="ud", pos_style='ud'):
+    def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), transformer="vg", parser="malt", outdir=None, dep_style="ud", pos_style='ud'):
         #TODO: ouch this is ugly
         if not outdir:
             if not treebank_name:

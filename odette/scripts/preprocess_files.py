@@ -11,7 +11,8 @@ def prepare_files(treebank_name, outdir=None, trainfile=None, testfile=None,
         tb = UDtreebank(treebank_name)
         trainfile = tb.trainfile
         testfile = tb.devfile
-    TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style)
+    TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style,
+                             pos_style=pos_style)
     TM.transform(trainfile, TM.trainfile, 'to_conllx')
     TM.transform(testfile, TM.testfile, 'to_conllx')
 
