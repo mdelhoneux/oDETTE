@@ -25,8 +25,9 @@ from scripts.collect_stats import run_stats
 #TODO: prepare file does not need to write to any file
 #right now I quite inelegantly write empty strings to files but should do
 #something better
+#TODO: Refactor this stuff it's so ugly it makes me cry
 
-def run(language, exp_type):
+def run(language, exp_type, metric):
     language_dir = config.exp + language
     if not os.path.exists(language_dir):
         os.mkdir(language_dir)
@@ -37,7 +38,7 @@ def run(language, exp_type):
         prepare_files(language,outdir=language_dir)
         return ""
     elif exp_type =="exp":
-        return run_experiment(language,outdir=language_dir)
+        return run_experiment(language,outdir=language_dir, metric=metric)
     elif exp_type == "stats":
         return run_stats(language,outdir=language_dir)
     elif exp_type == "ms_gold":
@@ -49,17 +50,17 @@ def run(language, exp_type):
     else:
         raise Exception, "Invalid exp_type"
 
-def table_headers(exp_type):
+def table_headers(exp_type, metric):
     if exp_type == "prep":
         return ""
     if exp_type == "baseline":
         return "language;LAS;UAS\n"
     elif exp_type =="exp":
-        return "language;baseline LAS; transformed LAS\n"
+        return "language;baseline %s; transformed %s\n"%(metric,metric)
     elif exp_type =="stats":
         return "language;n sentences; n tokens; aux freq \n"
     elif exp_type == "ms_gold":
-        return "language; LAS ; basline LAS\n"
+        return "language; LAS ; baseline LAS\n"
     elif exp_type == "non_proj":
         return "language; gold nproj; ms nproj; backtransformation nproj \n"
     elif exp_type == "backtransf":
@@ -84,6 +85,7 @@ if __name__=="__main__":
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in included)")
     arg_parser.add_argument('--parallel', default = 1, help="[1 for True|0 for False] Run everything in parallel. Default = 1.")
+    arg_parser.add_argument('--metric', default = 'LAS', help="[LAS|UAS] Default = LAS.")
 
     args = arg_parser.parse_args()
     args = vars(args) #converts the args namespace to a dict. Usage: args['arg']
@@ -92,6 +94,8 @@ if __name__=="__main__":
     exp_type = args['exp_type']
     parallel = bool(int(args['parallel']))
     version = args['version']
+    metric = args['metric']
+
     exec("langs = src.utils.%s"%version) #put iso_code in langs
     if args['include'] == "all":
         l_considered = [language for language in langs]
@@ -102,19 +106,19 @@ if __name__=="__main__":
         for l in l_excluded:
             l_considered.remove(l)
 
-    headers = table_headers(exp_type)
+    headers = table_headers(exp_type, metric)
     res.write(headers)
 
     if parallel:
         #run everything in parallel
         num_cores = multiprocessing.cpu_count()
-        results = Parallel(n_jobs=num_cores)(delayed(run)(language,exp_type) for language in l_considered)
+        results = Parallel(n_jobs=num_cores)(delayed(run)(language,exp_type,metric) for language in l_considered)
         for result in results:
             res.write(result)
     else:
         #results = [run(language,exp_type) for language in l_considered]
         for i, language in enumerate(l_considered):
             print "working on " + language + " (%s/%s)"%(i,len(l_considered))
-            lres = run(language,exp_type)
+            lres = run(language,exp_type,metric)
             res.write(lres)
             res.flush()

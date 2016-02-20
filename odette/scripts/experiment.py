@@ -17,7 +17,8 @@ from src.treebank_transformer import TreebankTransformer
 
 malteval = Malteval()
 
-def run_experiment(treebank_name,outdir=None,dep_style="ud", pos_style='ud'):
+def run_experiment(treebank_name,outdir=None,dep_style="ud", pos_style='ud',
+                   metric='LAS'):
     #TODO: have options for what goes in table
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style, pos_style=pos_style)
@@ -34,12 +35,20 @@ def run_experiment(treebank_name,outdir=None,dep_style="ud", pos_style='ud'):
     """RESULTS"""
     buas, blas= malteval.accuracy(test_gold,parsed_baseline)
     uas, las = malteval.accuracy(test_gold,parsed_ud)
-    las = str(float(las)*100)
-    blas = str(float(blas)*100)
-    #significance of las
-    sig = malteval.significance(test_gold, parsed_baseline, parsed_ud)
-    las += sig
-    output = "%s;%s;%s\n"%(treebank_name, blas, las)
+    output = ""
+    if metric =="LAS":
+        las = str(float(las)*100)
+        blas = str(float(blas)*100)
+        #significance of las
+        sig = malteval.significance(test_gold, parsed_baseline, parsed_ud)
+        las += sig
+        output = "%s;%s;%s\n"%(treebank_name, blas, las)
+    else:
+        uas = str(float(uas)*100)
+        buas = str(float(buas)*100)
+        sig = malteval.significance_uas(test_gold, parsed_baseline, parsed_ud)
+        uas += sig
+        output = "%s;%s;%s\n"%(treebank_name, buas, uas)
     return output
 
 def evaluate_back_transformation_accuracy(treebank_name,outdir=None):
@@ -86,6 +95,7 @@ def check_non_projectivity(treebank_name,outdir=None):
 
 if __name__=="__main__":
     #usage: python experiment.py treebank_name (dep_stype, pos_style, ambig)
+    #TODO: add metric option here if I want to try it on ambig exp
     treebank_name = sys.argv[1]
     dep_style = "ud"
     pos_style = 'ud'
