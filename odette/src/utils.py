@@ -72,11 +72,13 @@ pos_disambig = {
     'sdt':
     {
         'main_verb':'Verb-main',
-        'auxiliary':'Verb-copula'
+        #'auxiliary':'Verb-copula'
+        'auxiliary':'aux'
     },
     'pdt':
     {
         'main_verb':'Vp',
-        'auxiliary':'Vc'
+        #'auxiliary':'Vc'
+        'auxiliary':'aux'
     }
 }
