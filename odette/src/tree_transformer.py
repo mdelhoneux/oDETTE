@@ -112,7 +112,6 @@ class VGtransformer(TreeTransformer):
                 #and get moved at the same time as other dependents
                 self.move_dependents(self.dg[aux-1],vg.main_verb)
 
-    #TODO: all this stuff does not really belong to tree transformer
     def is_aux_dependency(self,dep):
         if self._dep_style == "ud":
             return self.is_aux_dependency_in_ud(dep)
@@ -125,6 +124,7 @@ class VGtransformer(TreeTransformer):
         return ((dep.deprel == "aux") and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
 
     def is_aux_dependency_in_pdt(self,dep):
+        #TODO: I might want to also consider pos tags and keep only the verb ones
         return (dep.deprel == "AuxV")
 
     def is_head_of_aux_dependency(self,dependency):
@@ -244,8 +244,6 @@ class VGtransformer(TreeTransformer):
                 self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)+1]
 
     def projectivize(self,vg):
-        #TODO: rename? Joakim mentioned that this was not the only goal of
-        #moving dependents, at least in his 06 paper
         deps = self.dg.get_dependents(vg.main_verb)
         for dep in deps:
             if dep.is_to_the_left_of(vg.leftmost_verb):
