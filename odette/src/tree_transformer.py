@@ -92,6 +92,7 @@ class VGtransformer(TreeTransformer):
         dependents to the right of the rightmost verb get attached to the rightmost verb
         remaining dependents get attached to the auxiliary that is closest to the verb
         """
+        self.dg.to_latex() #debugging purposes
         VGs = self.find_vgs_in_ud()
         for vg in VGs:
             if len(vg.aux_ids) == 1:
@@ -101,9 +102,11 @@ class VGtransformer(TreeTransformer):
                 #self.dg.to_latex() #how I found the strange Danish example
                 self.vg_to_chain(vg)
             self.projectivize(vg)
+        self.dg.to_latex()
 
     def detransform(self):
         """Attach auxiliaries and their dependents to the main verb"""
+        self.dg.to_latex()
         VGs = self.find_vgs_in_ms()
         for vg in VGs:
             self.invert_dep(vg.main_verb, vg.outermost_aux)
@@ -111,6 +114,7 @@ class VGtransformer(TreeTransformer):
                 #other auxiliaries are dependent of an aux
                 #and get moved at the same time as other dependents
                 self.move_dependents(self.dg[aux-1],vg.main_verb)
+        self.dg.to_latex()
 
     def is_aux_dependency(self,dep):
         if self._dep_style == "ud":
@@ -121,11 +125,25 @@ class VGtransformer(TreeTransformer):
     def is_aux_dependency_in_ud(self,dep):
         """Only auxiliary dependencies between verbal forms (aux or verb) are considered"""
         aux_tags = ["AUX", "VERB"]
-        return ((dep.deprel == "aux") and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
+        #TODO: remove this later
+        aux_deprels = ["aux", "auxpass", "cop"]
+        #return ((dep.deprel == "aux") and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
+        return ((dep.deprel in aux_deprels) and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
 
     def is_aux_dependency_in_pdt(self,dep):
-        #TODO: I might want to also consider pos tags and keep only the verb ones
-        return (dep.deprel == "AuxV")
+        #return (dep.deprel == "AuxV") #original experiment
+        #TEST: checking the pos - for the record: does not change the score at all
+        #TODO: remove or refactor
+        if (dep.deprel == "AuxV"):
+            if self._pos_style == 'pdt':
+                return ((dep.postag[0] == "V" ) and (self.dg[dep.head-1].postag[0] == "V" ))
+            elif self._pos_style == 'sdt':
+                dpos = dep.postag.split('-')
+                hpos = self.dg[dep.head-1].postag.split('-')
+                return (len(dpos) > 1 and len(hpos) >1 and dpos[0] == "Verb" and hpos[0] == "Verb")
+        return False
+
+
 
     def is_head_of_aux_dependency(self,dependency):
         """return the ID of the dependency relation if it is"""
@@ -230,18 +248,21 @@ class VGtransformer(TreeTransformer):
         #change direction of dependency relation between main verb and closest aux
         vg.main_verb.head = vg.closest_aux.ID
         vg.main_verb.deprel = vg.closest_aux.deprel
+        if vg.outermost_aux.ID < vg.main_verb.ID:
+            for aux in vg.aux_ids[1:]:
+                self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)-1]
+                self.dg[aux-1].deprel = self.dg[vg.aux_ids[vg.aux_ids.index(aux)-1]-1].deprel
+        #main verb to the left
+        else:
+            for aux in vg.aux_ids[-2::-1]:
+                self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)+1]
+                self.dg[aux-1].deprel = self.dg[vg.aux_ids[vg.aux_ids.index(aux)+1]-1].deprel
+
         #head of main verb becomes head of outermost aux
         vg.outermost_aux.head = mv_head
         vg.outermost_aux.deprel = mv_deprel
         #remaining aux: a chain from the outermost to the main verb
         #main verb is to the right
-        if vg.outermost_aux.ID < vg.main_verb.ID:
-            for aux in vg.aux_ids[1:]:
-                self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)-1]
-        #main verb to the left
-        else:
-            for aux in vg.aux_ids[-2::-1]:
-                self.dg[aux-1].head = vg.aux_ids[vg.aux_ids.index(aux)+1]
 
     def projectivize(self,vg):
         deps = self.dg.get_dependents(vg.main_verb)
