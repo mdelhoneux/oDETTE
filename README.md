@@ -36,7 +36,7 @@ $rm -r Users UD_Data
 Change variables data, code, maltparser and malteval to be the directories that you put them in. By default, it is assumed that the code is the current directory, that data, maltparser and malteval are directories in the current directory called ud-treebanks-v1.2, maltparser-1.8.1 and malteval respectively. 
 
 #Usage
-Most experiments on UD are run with main.py
+Most experiments on UD are run with main.py   
 Run the following to find out more about the different options.
 ```bash
 python odette/main.py --help
