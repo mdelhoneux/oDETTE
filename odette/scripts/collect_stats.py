@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:Collect stats on treebanks (n of sentences, tokens and aux frequency)
 #usage			:python scripts/collect_stats.py treebank_name trainfile testfile
 #Python version :2.7.6

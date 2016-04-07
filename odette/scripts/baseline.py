@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:Run a baseline parser
 #usage			:python baseline.py treebank_name trainfile testfile
 #Python version :2.7.6
@@ -34,18 +34,14 @@ def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):
     return output
 
 if __name__=="__main__":
-    """usage: python baseline.py treebank_name (trainfile testfile ambig)"""
-    #TODO: ambig is just for the filename but at the moment I don't really
-    #care about what goes in the file
+    """usage: python baseline.py treebank_name (trainfile testfile)"""
     treebank_name = sys.argv[1]
     train=None
     test=None
-    ambig = None
     if len(sys.argv) > 2:
         train = sys.argv[2]
         test = sys.argv[3]
-        ambig = sys.argv[4]
-    res = open('baseline_results_%s_%s.csv'%(treebank_name,ambig), "w")
+    res = open('baseline_results_%s.csv'%(treebank_name), "w")
     res.write("treebank_name;LAS;UAS\n")
     output = run_baseline(treebank_name,trainfile=train,testfile=test)
     res.write(output)

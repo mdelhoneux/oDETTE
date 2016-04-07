@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:Class to transform representations in dependency graphs
 #               :Currently only verb group transformation is implemented
 #Python version :2.7.6
@@ -124,7 +124,6 @@ class VGtransformer(TreeTransformer):
         return ((dep.deprel == "aux") and (dep.cpostag in aux_tags) and (self.dg[dep.head-1].cpostag in aux_tags))
 
     def is_aux_dependency_in_pdt(self,dep):
-        #TODO: I might want to also consider pos tags and keep only the verb ones
         return (dep.deprel == "AuxV")
 
     def is_head_of_aux_dependency(self,dependency):
@@ -142,7 +141,6 @@ class VGtransformer(TreeTransformer):
         Input: dependency graph
         output: list of verb group objects
         """
-        #TODO: I might want to rename that since I use it for PDT
         VGs = []
         main_verbs = []
         vg = VerbGroup()

@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:collect iso codes in UD directories
 #usage			:python scripts/collect_iso_codes.py
 #Python version :2.7.6
@@ -11,6 +11,7 @@
 
 
 import os
+#TODO: in the future I might actually need this more so I should generalize
 v1 = "/home/miryam/Data/ud-treebanks-v1.1/"
 v2 = "/home/miryam/Data/ud-treebanks-v1.2/"
 v1_1 = {}

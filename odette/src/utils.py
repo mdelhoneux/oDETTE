@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #Python version :2.7.6
 #==============================================================================
 
@@ -63,7 +63,6 @@ extra = {
 v1_2 = dict(v1_1.items() + extra.items())
 
 pos_disambig = {
-    #TODO: maybe these are not the best choices
     'ud':
     {
         'main_verb':'VERB',

@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:Transform parse detransform experiment pipeline on a treebank
 #usage			:python scripts/experiment.py treebank_name (POS-style)
 #Python version :2.7.6
@@ -22,7 +22,6 @@ def run_experiment(treebank_name,outdir=None,dep_style="ud", pos_style='ud',
     #TODO: have options for what goes in table
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankTransformer(treebank_name=treebank_name, dep_style=dep_style, pos_style=pos_style)
-    #TODO: optionalize
     TM.transform_parse_detransform() #if you just want the eval you can just comment this out
 
     """FILES"""
@@ -64,7 +63,7 @@ def evaluate_back_transformation_accuracy(treebank_name,outdir=None):
 
 def evaluate_on_transformed_gold(treebank_name,outdir=None):
     """Evaluate on the transformed representation as gold standard"""
-    if not outdir: outdir= config.exp + treebank_name
+    if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankTransformer(treebank_name=treebank_name)
     dev_gold_ms = "%sdev_gold.ms.conll"%outdir
     parsed_ms = "%sdev_parsed.ms.conll"%outdir
@@ -95,7 +94,6 @@ def check_non_projectivity(treebank_name,outdir=None):
 
 if __name__=="__main__":
     #usage: python experiment.py treebank_name (dep_stype, pos_style, ambig)
-    #TODO: add metric option here if I want to try it on ambig exp
     treebank_name = sys.argv[1]
     dep_style = "ud"
     pos_style = 'ud'
@@ -106,6 +104,6 @@ if __name__=="__main__":
         ambig = sys.argv[4]
     res = open('exp_results_%s_%s.csv'%(treebank_name, ambig), "w")
     res.write("treebank_name;baseline LAS; transformed LAS\n")
-    output = run_experiment(treebank_name,dep_style=dep_style,
-                            pos_style=pos_style)
+    output = run_experiment(treebank_name,dep_style=dep_style, pos_style=pos_style)
+    #output = evaluate_back_transformation_accuracy(treebank_name)
     res.write(output)

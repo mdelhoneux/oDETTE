@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:Wrapper around MaltEval to facilitate writing to tables
 #usage			:python src/malteval.py gold test
 #Python version :2.7.6
@@ -21,8 +21,6 @@ class Malteval(object):
 
     def accuracy(self,gold,test, exclude_punct=False):
         """UAS and LAS of test on gold"""
-        #TODO: expose the exclude_deprel elsewhere
-        #TODO: maybe change the default
         cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --row-header 0 --tab 1 --header-info 0 --Metric 'LAS;UAS'"%(self._location,gold,test)
         if exclude_punct:
             cmd += " --ExcludeDeprels 'punct'"

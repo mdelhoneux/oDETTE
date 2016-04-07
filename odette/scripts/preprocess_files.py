@@ -24,7 +24,10 @@ def prepare_files(treebank_name, outdir=None, trainfile=None, testfile=None,
 
 
 if __name__=="__main__":
-	"""usage: python preprocess_files.py treebank_name trainfile testfile (ambig)"""
+	"""
+    usage: python preprocess_files.py treebank_name trainfile testfile (ambig
+    dep_style pos_style)
+    """
 	import sys
 	treebank_name = sys.argv[1]
 	train = sys.argv[2]

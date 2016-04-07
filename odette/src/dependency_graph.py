@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:class to facilitate work with dependency graphs
 #Python version :2.7.6
 #==============================================================================
@@ -67,9 +67,9 @@ class DependencyGraph(list):
     def make_verbs_ambiguous(self, pos_style="ud"):
         for dep in self:
             if pos_style == "ud":
+				#change the postag according to the cpostag
                 if dep.cpostag == "AUX":
                     dep.cpostag = "VERB"
-                #TODO: this is a bit confusing
                 dep.postag = dep.cpostag
             elif pos_style == "sdt":
                 pos = dep.postag.split("-")
@@ -98,13 +98,12 @@ class DependencyGraph(list):
         Writes a dependency graph to latex then convert to png then open the figure
         in google chrome
         """
-        #DISCLAIMER: MIGHT NOT WORK
+        #/!\DISCLAIMER: PROBABLY DOES NOT WORK FOR MOST PEOPLE /!\ 
         #FIXME: warning this thing became more of a bash script with lots of hardcoded stuff
         #generalize it at some point or remove (the Danish group seems to have
         #done a python visualizer (cf TLT talk) so I should check their code
         #FIXME: doesnt' work for French because of weird characters - I should do something
         # about the encoding
-        #TODO: option to not output it to a file
         out = open('figure.tex', "w")
         text = " \& ".join([dep.form for dep in self])
         text += "\\\\"

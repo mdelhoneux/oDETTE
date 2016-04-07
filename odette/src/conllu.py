@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:Read and write files in conll format using DependencyGraph objects
 #Python version :2.7.6
 #==============================================================================
@@ -110,8 +110,7 @@ def test_read():
 if __name__ =="__main__":
     import sys
     #convert malt to conllx
-    #TODO: this should not be done here 
-    #should be an option in preprocess_files
+    #TODO: does not belong here
     cn = MaltTabReader()
     infile = sys.argv[1]
     outfile = sys.argv[2]

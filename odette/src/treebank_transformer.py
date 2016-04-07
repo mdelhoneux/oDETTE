@@ -3,7 +3,7 @@
 #author			:Miryam de Lhoneux
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
-#version		:0.1
+#version		:1.0
 #description	:A class to facilitate tree transformations on treebanks
 #               :It can also be used to run baselines
 #Python version :2.7.6
@@ -51,7 +51,6 @@ class TreebankTransformer():
         self.transform(self.parsed_ms, self.parsed_ud, "detransform")
 
     def transform_detransform_trainfile(self):
-        #TODO: could concatenate train and test but not sure would change much
         self.transformed_train = "%strain.ms.conll"%self.outdir
         self.transform(self.trainfile, self.transformed_train, "transform")
         self.back_transf =  "%strain_backtransf.conll"%self.outdir
