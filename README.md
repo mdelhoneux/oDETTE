@@ -53,3 +53,7 @@ $python odette/src/malteval.py goldfile testfile #to print LAS UAS of a parsed f
 
 ###Release 1.0
 The release corresponds to the experiments run in the paper cited above. All the commands corresponding to the tables are collected in paper\_commands.sh. The file gives comprehensive instructions for reproducing results. The experiments on SDT require the version of SDT available at http://nl.ijs.si/sdt/data/SDT-2006-05-17.zip and the PDT can be obtained through the LDC.
+
+###TODO
+* Write proper error messages
+* Break the code if external code breaks (error messages coming from MaltParser can be confusing if something is done wrong)
