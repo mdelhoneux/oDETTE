@@ -6,4 +6,4 @@ data = "./Data/ud-treebanks-v1.2/"
 
 #options
 USE_CPOSTAG=True
-KEEP_COP=False #set to false to remove sentences with cop deprels
+KEEP_COP=True #set to false to remove sentences with cop deprels
