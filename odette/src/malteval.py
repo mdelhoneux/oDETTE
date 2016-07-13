@@ -71,8 +71,27 @@ class Malteval(object):
         res = os.popen(cmd)
         return [[value for value in line.split("\t")] for line in res][2:]
 
+#--------------
+def pos_tagging_accuracy(gold,test):
+    """POS TAGGING ACCURACY"""
+    #TODO: currently assumes perfect tokenization!!
+    from src.conllu import ConllFileHandler
+    conll_reader = ConllFileHandler()
+    gold_graphs = conll_reader.file_to_dg_list(gold)
+    test_graphs = conll_reader.file_to_dg_list(test)
+    correct = 0
+    tot = 0
+    for ggraph, tgraph in zip(gold_graphs,test_graphs):
+        for gdep, tdep in zip(ggraph, tgraph):
+            tot += 1
+            if gdep.postag == tdep.postag:
+                correct += 1
+    return (correct/float(tot))*100
+
 if __name__=="__main__":
     malteval = Malteval()
     gold = sys.argv[1]
     test = sys.argv[2]
     print malteval.accuracy(gold,test)
+    #TODO: make this an option
+    #print pos_tagging_accuracy(gold,test)
