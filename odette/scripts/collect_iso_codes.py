@@ -11,23 +11,18 @@
 
 
 import os
-#TODO: in the future I might actually need this more so I should generalize
-v1 = "/home/miryam/Data/ud-treebanks-v1.1/"
-v2 = "/home/miryam/Data/ud-treebanks-v1.2/"
-v1_1 = {}
-v1_2 = {}
-for language in os.listdir(v1):
-    ldir = v1 + "/" + language
-    for f in os.listdir(ldir):
-        if len(f.split(".")) >1 and f.split(".")[1] == "conllu":
-            iso_code = f.split("-")[0]
-            v1_1[language] = iso_code
+import sys
+import pprint
 
-for language in os.listdir(v2):
-    if language in v1_1:
-        continue
-    ldir = v2 + "/" + language
+#generate a dictionary of iso_codes from ud treebank directory
+codes = {}
+ud_dir = sys.argv[1]
+for language in os.listdir(ud_dir):
+    ldir = ud_dir + "/" + language
     for f in os.listdir(ldir):
         if len(f.split(".")) >1 and f.split(".")[1] == "conllu":
             iso_code = f.split("-")[0]
-            v1_2[language] = iso_code
+            codes[language] = iso_code
+
+pp = pprint.PrettyPrinter(indent=4)
+pp.pprint(codes)
