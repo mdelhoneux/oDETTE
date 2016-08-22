@@ -15,52 +15,63 @@ def dict_count_to_freq(d):
         d[val] /= float(tot_d)
     return d
 
-"""OTHER"""
-#ISO codes of different versions
-v1_1 = {
-     'UD_German': 'de',
-     'UD_English': 'en',
-     'UD_Basque': 'eu',
-     'UD_Croatian': 'hr',
-     'UD_Finnish': 'fi',
-     'UD_Persian': 'fa',
-     'UD_Danish': 'da',
-     'UD_Hebrew': 'he',
-     'UD_Indonesian': 'id',
-     'UD_Greek': 'el',
-     'UD_Swedish': 'sv',
-     'UD_Finnish-FTB': 'fi_ftb',
-     'UD_Irish': 'ga',
-     'UD_Czech': 'cs',
-     'UD_Spanish': 'es',
-     'UD_French': 'fr',
-     'UD_Bulgarian': 'bg',
-     'UD_Italian': 'it',
-     'UD_Hungarian': 'hu'
-    }
 
-extra = {
-     'UD_Hindi': 'hi',
-     'UD_Norwegian': 'no',
-     'UD_Latin-ITT': 'la_itt',
-     'UD_Latin-PROIEL': 'la_proiel',
-     'UD_Dutch': 'nl',
-     'UD_Romanian': 'ro',
-     'UD_Slovenian': 'sl',
-     'UD_Latin': 'la',
-     'UD_Gothic': 'got',
-     'UD_Arabic': 'ar',
-     'UD_Estonian': 'et',
-     'UD_Ancient_Greek': 'grc',
-     'UD_Old_Church_Slavonic': 'cu',
-     'UD_Ancient_Greek-PROIEL': 'grc_proiel',
-     'UD_Tamil': 'ta',
-     'UD_Japanese-KTC': 'ja_ktc',
-     'UD_Portuguese': 'pt',
-     'UD_Polish': 'pl'
-    }
-
-v1_2 = dict(v1_1.items() + extra.items())
+iso_code ={
+ 'UD_Ancient_Greek': 'grc',
+ 'UD_Ancient_Greek-PROIEL': 'grc_proiel',
+ 'UD_Arabic': 'ar',
+ 'UD_Basque': 'eu',
+ 'UD_Bulgarian': 'bg',
+ 'UD_Catalan': 'ca',
+ 'UD_Chinese': 'zh',
+ 'UD_Croatian': 'hr',
+ 'UD_Czech': 'cs',
+ 'UD_Czech-CAC': 'cs_cac',
+ 'UD_Czech-CLTT': 'cs_cltt',
+ 'UD_Danish': 'da',
+ 'UD_Dutch': 'nl',
+ 'UD_Dutch-LassySmall': 'nl_lassysmall',
+ 'UD_English': 'en',
+ 'UD_English-ESL': 'en_esl',
+ 'UD_English-LinES': 'en_lines',
+ 'UD_Estonian': 'et',
+ 'UD_Finnish': 'fi',
+ 'UD_Finnish-FTB': 'fi_ftb',
+ 'UD_French': 'fr',
+ 'UD_Galician': 'gl',
+ 'UD_German': 'de',
+ 'UD_Gothic': 'got',
+ 'UD_Greek': 'el',
+ 'UD_Hebrew': 'he',
+ 'UD_Hindi': 'hi',
+ 'UD_Hungarian': 'hu',
+ 'UD_Indonesian': 'id',
+ 'UD_Irish': 'ga',
+ 'UD_Italian': 'it',
+ 'UD_Japanese-KTC': 'ja_ktc',
+ 'UD_Kazakh': 'kk',
+ 'UD_Latin': 'la',
+ 'UD_Latin-ITTB': 'la_ittb',
+ 'UD_Latin-PROIEL': 'la_proiel',
+ 'UD_Latvian': 'lv',
+ 'UD_Norwegian': 'no',
+ 'UD_Old_Church_Slavonic': 'cu',
+ 'UD_Persian': 'fa',
+ 'UD_Polish': 'pl',
+ 'UD_Portuguese': 'pt',
+ 'UD_Portuguese-BR': 'pt_br',
+ 'UD_Romanian': 'ro',
+ 'UD_Russian': 'ru',
+ 'UD_Russian-SynTagRus': 'ru_syntagrus',
+ 'UD_Slovenian': 'sl',
+ 'UD_Slovenian-SST': 'sl_sst',
+ 'UD_Spanish': 'es',
+ 'UD_Spanish-AnCora': 'es_ancora',
+ 'UD_Swedish': 'sv',
+'UD_Swedish-LinES': 'sv_lines',
+'UD_Tamil': 'ta',
+'UD_Turkish': 'tr'
+}
 
 pos_disambig = {
     'ud':
