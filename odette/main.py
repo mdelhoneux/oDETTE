@@ -74,7 +74,6 @@ if __name__=="__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--outfile', default = './results.csv', help='A file name, it will contain the results: Default: results.csv in current directory')
     arg_parser.add_argument('--exp_type', default = 'baseline', help='[prep|baseline|exp|stats|ms_gold|non_proj|backtransf] Type of experiment to carry. Default: run all baselines.  prep: preprocess files, stats: count sentences, tokens and auxiliaries. exp: run experiment.  ms_gold: evaluate on transformed rep (warning: experiment must have been run before).  non_proj: counts non-projectivity in gold, transformed and backtransformed training data.  backtransf: test the accuracy of the backtransformation on the training files')
-    arg_parser.add_argument('--version', default = 'v1_2', help='[v1_1|v1_2] The version of UD.  Default = v1_2 which corresponds to v1.2. Note: The version needs to contain a iso dictionary in utils ')
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in included)")
     arg_parser.add_argument('--parallel', default = 1, help="[1|0] Run everything in parallel. Default = 1.")
@@ -86,10 +85,9 @@ if __name__=="__main__":
     resfile = open(args['outfile'], "w")
     exp_type = args['exp_type']
     parallel = bool(int(args['parallel']))
-    version = args['version']
     metric = args['metric']
 
-    exec("langs = src.utils.%s"%version) #put iso_code in langs
+    langs = src.utils.iso_code
     if args['include'] == "all":
         l_considered = [language for language in langs]
     else:
@@ -108,7 +106,8 @@ if __name__=="__main__":
         num_cores = multiprocessing.cpu_count()
         results = Parallel(n_jobs=num_cores)(delayed(run)(language,exp_type,metric) for language in l_considered)
         for result in results:
-            resfile.write(result)
+            if result: #accounting for None returned in prep
+                resfile.write(result)
     else:
         #results = [run(language,exp_type) for language in l_considered]
         for i, language in enumerate(l_considered):

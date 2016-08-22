@@ -10,11 +10,10 @@
 import config
 import src.utils
 class UDtreebank():
-    def __init__(self,language,version="v1_2",location = config.data):
+    def __init__(self,language,location = config.data):
         self._language = language
         self._location = location
-        self._version = version
-        exec("iso_dic = src.utils.%s"%version)
+        iso_dic = src.utils.iso_code
         files_prefix = self._location + language + "/" + iso_dic[self._language]
         self.trainfile = files_prefix + "-ud-train.conllu"
         self.devfile = files_prefix + "-ud-dev.conllu"
