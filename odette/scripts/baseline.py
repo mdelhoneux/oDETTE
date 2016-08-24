@@ -14,11 +14,32 @@ import config
 from src.malteval import Malteval
 from src.parsers import MaltParser
 from src.treebank_transformer import TreebankTransformer
+from src.treebank_manager import TreebankManager
 from src.UD_treebank import UDtreebank
 
+malteval = Malteval()
+
+#TODO: rename
+def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS'):
+    if not outdir: outdir= config.exp + treebank_name + "/"
+    TM = TreebankManager(treebank_name,outdir)
+    TT = TreebankTransformer(treebank_name=treebank_name)
+    #TODO: ouch this is ugly
+    TT.transform(TM.treebank.devfile, TM.dev_gold, "to_conllx")
+    TM.train_tagger()
+    TM.train_parser()
+    TM.tag_test_files()
+    TM.test_parser()
+    TT.transform(TM.dev_parsed, TM.dev_parsed_x, "to_conllx")
+    uas, las= malteval.accuracy(TM.dev_gold,TM.dev_parsed_x)
+    output = "%s;%s;%s\n"%(treebank_name,las,uas)
+    return output
+
+
+
+#TODO: rename
 def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):
     if not outdir: outdir= config.exp + treebank_name
-    malteval = Malteval()
     TM = TreebankTransformer(treebank_name=treebank_name)
     """Train and parse"""
     train_gold = TM.trainfile

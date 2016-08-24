@@ -111,7 +111,8 @@ if __name__ =="__main__":
     import sys
     #convert malt to conllx
     #TODO: does not belong here
-    cn = MaltTabReader()
+    cn = ConllFileHandler()
+    #cn = MaltTabReader()
     infile = sys.argv[1]
     outfile = sys.argv[2]
     dgs = cn.file_to_dg_list(infile)

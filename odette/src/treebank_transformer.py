@@ -34,7 +34,9 @@ class TreebankTransformer():
         self._file_handler = file_handler
         self._transformer=transformer
         self.trainfile = "%strain.conll"%self.outdir
+        #TODO: modify this shit
         self.testfile = "%stest_gold.conll"%self.outdir
+        self.realtestfile = "%srealtest_gold.conll"%self.outdir
         self._dep_style = dep_style
         self._pos_style = pos_style
 

@@ -85,6 +85,7 @@ def pos_tagging_accuracy(gold,test):
         for gdep, tdep in zip(ggraph, tgraph):
             tot += 1
             if gdep.postag == tdep.postag:
+            #if gdep.cpostag == tdep.cpostag:
                 correct += 1
     return (correct/float(tot))*100
 

@@ -58,6 +58,9 @@ class DependencyGraph(list):
         for dep in self:
             dep.deps = "_"
             dep.misc = "_"
+            #FOR PARSEY MC PARSEFACE
+            #dep.deps = ""
+            #dep.misc = ""
             if dep.postag == "_":
                 dep.postag = dep.cpostag
             #for using the cpostag for parsing
