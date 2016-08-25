@@ -11,7 +11,7 @@
 
 
 from src.conllu import ConllFileHandler, MaltTabReader
-from src.parsers import MaltParser, MaltOptimizer
+from src.parsers import MaltParser, MaltOptimizer, UDPipeParser
 from src.taggers import UDPipeTagger
 import config
 import os
@@ -31,6 +31,8 @@ class TreebankManager():
             self._parser = MaltParser(name=treebank_name)
         elif parser == "maltOpt":
             self._parser = MaltOptimizer(name=treebank_name)
+        elif parser == "udpipe":
+            self._parser = UDPipeParser(path="%s/udpipe-parser"%outdir)
         else:
             raise Exception, "Invalid parser"
 
@@ -43,6 +45,7 @@ class TreebankManager():
         self.treebank_name = treebank_name
         self._file_handler = file_handler
         #TODO: ouch this is ugly
+        self.trainfile = "%s/train.conll"%outdir
         self.devfile = "%s/dev_tagged.conllu"%outdir
         self.testfile = "%s/test_tagged.conllu"%outdir
         self.dev_gold = "%s/dev_gold.conllx"%outdir
@@ -54,7 +57,8 @@ class TreebankManager():
         self._tagger.train(self.treebank.trainfile)
 
     def train_parser(self):
-        self._parser.train(self.treebank.trainfile)
+        #TODO: problem: depends on parser which to use: conllu or conllx
+        self._parser.train(self.trainfile)
 
     def tag_test_files(self):
         self._tagger.tag(self.treebank.devfile, self.devfile)

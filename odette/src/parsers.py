@@ -43,23 +43,36 @@ class MaltOptimizer(Parser):
 
     def train(self, trainfile):
         #TODO: this is so ugly it makes me cry
+        #TODO: move this to some bash script?
         owd = os.getcwd()
         os.chdir(self._path_to_malt_opt)
-        for i in range(3):
-            cmd = "java -jar %s/MaltOptimizer.jar -p %d -m %s -c %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile)
+        for i in range(1,4):
+            cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile)
+            print cmd
             os.system(cmd)
-
-        cmd2 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m learn -i %s -grl root"%(self._path_to_malt,config.exp,self._name, self._name, trainfile)
-        os.system(cmd2)
         cmd3 = "mv %sfinalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
         cmd4 = "mv %s.mco %s"%(self._name,owd)
         os.system(cmd3)
         os.system(cmd4)
         os.chdir(owd)
+        cmd2 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m learn -i %s -grl root"%(self._path_to_malt,config.exp,self._name, self._name, trainfile)
+        os.system(cmd2)
 
     def parse(self,testfile,outfile):
         #TODO: aaaah seriously Miryam
         cmd = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,config.exp,self._name, self._name, testfile, outfile)
+        os.system(cmd)
+
+class UDPipeParser(Parser):
+    def __init__(self,path="./udpipe_parser"):
+        self._path = path
+
+    def train(self,trainfile):
+        cmd = "udpipe --train %s %s"%(self._path,trainfile)
+        os.system(cmd)
+
+    def parse(self,testfile,outfile):
+        cmd = "udpipe --parse %s %s >%s"%(self._path,testfile,outfile)
         os.system(cmd)
 
 

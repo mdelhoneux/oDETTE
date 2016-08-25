@@ -26,7 +26,7 @@ def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS'):
     TT = TreebankTransformer(treebank_name=treebank_name)
     #TODO: ouch this is ugly
     TT.transform(TM.treebank.devfile, TM.dev_gold, "to_conllx")
-    TM.train_tagger()
+    #TM.train_tagger()
     TM.train_parser()
     TM.tag_test_files()
     TM.test_parser()
