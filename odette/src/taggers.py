@@ -22,7 +22,7 @@ class UDPipeTagger(Tagger):
         self._path = path
 
     def train(self,trainfile):
-        cmd = "udpipe --train %s %s"%(self._path,trainfile)
+        cmd = "udpipe --train --parser=none --tokenizer=none %s %s"%(self._path,trainfile)
         os.system(cmd)
 
     def tag(self,testfile,outfile):
