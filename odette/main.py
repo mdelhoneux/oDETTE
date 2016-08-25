@@ -18,7 +18,7 @@ import multiprocessing
 import config
 import src.utils
 from scripts.preprocess_files import prepare_files
-from scripts.baseline import run_baseline
+from scripts.baseline import run_baseline, run_baseline_with_tagger
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
 from scripts.collect_stats import run_stats
 
@@ -29,6 +29,8 @@ def run(language, exp_type, metric):
     language_dir += "/"
     if exp_type == "baseline":
         return run_baseline(language,outdir=language_dir)
+    elif exp_type == "tag_parse":
+        return run_baseline_with_tagger(language, outdir=language_dir)
     elif exp_type == "prep":
         prepare_files(language,outdir=language_dir)
         return None
@@ -49,6 +51,8 @@ def table_headers(exp_type, metric):
     if exp_type == "prep":
         return ""
     if exp_type == "baseline":
+        return "language;LAS;UAS\n"
+    if exp_type == "tag_parse":
         return "language;LAS;UAS\n"
     elif exp_type =="exp":
         return "language;baseline %s; transformed %s\n"%(metric,metric)
@@ -73,7 +77,7 @@ def parse_list_arg(l):
 if __name__=="__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--outfile', default = './results.csv', help='A file name, it will contain the results: Default: results.csv in current directory')
-    arg_parser.add_argument('--exp_type', default = 'baseline', help='[prep|baseline|exp|stats|ms_gold|non_proj|backtransf] Type of experiment to carry. Default: run all baselines.  prep: preprocess files, stats: count sentences, tokens and auxiliaries. exp: run experiment.  ms_gold: evaluate on transformed rep (warning: experiment must have been run before).  non_proj: counts non-projectivity in gold, transformed and backtransformed training data.  backtransf: test the accuracy of the backtransformation on the training files')
+    arg_parser.add_argument('--exp_type', default = 'baseline', help='[prep|baseline|exp|stats|ms_gold|non_proj|backtransf|tag_parse] Type of experiment to carry. Default: run all baselines.  prep: preprocess files, stats: count sentences, tokens and auxiliaries. exp: run experiment.  ms_gold: evaluate on transformed rep (warning: experiment must have been run before).  non_proj: counts non-projectivity in gold, transformed and backtransformed training data.  backtransf: test the accuracy of the backtransformation on the training files')
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in included)")
     arg_parser.add_argument('--parallel', default = 1, help="[1|0] Run everything in parallel. Default = 1.")
@@ -113,5 +117,6 @@ if __name__=="__main__":
         for i, language in enumerate(l_considered):
             print "working on " + language + " (%s/%s)"%(i,len(l_considered))
             lres = run(language,exp_type,metric)
-            resfile.write(lres)
-            resfile.flush()
+            if lres:
+                resfile.write(lres)
+                resfile.flush()
