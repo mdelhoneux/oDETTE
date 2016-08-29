@@ -21,8 +21,11 @@ class UDPipeTagger(Tagger):
     def __init__(self,path="./udpipe_tagger"):
         self._path = path
 
-    def train(self,trainfile):
-        cmd = "udpipe --train --parser=none --tokenizer=none %s %s"%(self._path,trainfile)
+    def train(self,trainfile, devfile=None):
+        if not devfile:
+            cmd = "udpipe --train --parser=none --tokenizer=none %s %s"%(self._path,trainfile)
+        else:
+            cmd = "udpipe --train --heldout=%s --parser=none --tokenizer=none %s %s"%(devfile, self._path,trainfile)
         os.system(cmd)
 
     def tag(self,testfile,outfile):

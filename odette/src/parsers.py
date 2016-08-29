@@ -15,7 +15,7 @@ import os
 import sys
 
 class Parser(object):
-    def train(self, trainfile):
+    def train(self, trainfile, devfile):
         raise NotImplementedError
     def parse(self, testfile, outfile):
         raise NotImplementedError
@@ -26,7 +26,7 @@ class MaltParser(Parser):
         self._path_to_malt = path_to_malt
         self.name = name
 
-    def train(self, trainfile):
+    def train(self, trainfile, devfile=None):
         cmd = "java -jar -Xmx2g %s -c %s -m learn -i %s -grl root"%(self._path_to_malt, self.name, trainfile)
         os.system(cmd)
 
@@ -41,13 +41,22 @@ class MaltOptimizer(Parser):
         self._path_to_malt_opt = path_to_malt_opt
         self._name = name
 
-    def train(self, trainfile):
+    def train(self, trainfile, devfile=None):
         #TODO: this is so ugly it makes me cry
         #TODO: move this to some bash script?
         owd = os.getcwd()
         os.chdir(self._path_to_malt_opt)
+        if devfile:
+            valid_command = "-v " + devfile
+        else:
+            valid_command = ""
         for i in range(1,4):
-            cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile)
+            #TODO: erm I'm sure I can do that more neatly
+            if i == 1:
+                v = ""
+            else:
+                v  = valid_command
+            cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
             print cmd
             os.system(cmd)
         cmd3 = "mv %sfinalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
@@ -67,8 +76,11 @@ class UDPipeParser(Parser):
     def __init__(self,path="./udpipe_parser"):
         self._path = path
 
-    def train(self,trainfile):
-        cmd = "udpipe --train --tagger=none --tokenizer=none %s %s"%(self._path,trainfile)
+    def train(self,trainfile, devfile=None):
+        if not devfile:
+            cmd = "udpipe --train --tagger=none --tokenizer=none %s %s"%(self._path,trainfile)
+        else:
+            cmd = "udpipe --train --heldout=%s --tagger=none --tokenizer=none %s %s"%(devfile,self._path,trainfile)
         os.system(cmd)
 
     def parse(self,testfile,outfile):

@@ -16,6 +16,7 @@ from src.taggers import UDPipeTagger
 import config
 import os
 from src.UD_treebank import UDtreebank
+from src.treebank_transformer import TreebankTransformer
 
 class TreebankManager():
     #TODO: change default parser back to maltparser
@@ -27,10 +28,13 @@ class TreebankManager():
         #self.trainfile = tb.trainfile
         #self.devfile = tb.devfile
         #self.testfile = tb.testfile
+        self.conllx = False
+        self.TT = TreebankTransformer(treebank_name=treebank_name)
         if parser == "malt":
             self._parser = MaltParser(name=treebank_name)
         elif parser == "maltOpt":
             self._parser = MaltOptimizer(name=treebank_name)
+            self.conllx = True
         elif parser == "udpipe":
             self._parser = UDPipeParser(path="%s/udpipe-parser"%outdir)
         else:
@@ -38,31 +42,47 @@ class TreebankManager():
 
         if tagger == "udpipe":
             self._tagger = UDPipeTagger(path="%s/udpipe-tagger"%outdir)
-            #TODO: change to that after I made sure maltopt works
-            #self._tagger = UDPipeTagger(name=treebank_name)
         else:
             raise Exception, "Invalid tagger"
         self.treebank_name = treebank_name
         self._file_handler = file_handler
-        #TODO: ouch this is ugly
-        self.trainfile = "%s/train.conll"%outdir
-        self.devfile = "%s/dev_tagged.conllu"%outdir
-        self.testfile = "%s/test_tagged.conllu"%outdir
-        self.dev_gold = "%s/dev_gold.conllx"%outdir
-        self.test_gold = "%s/test_gold.conllx"%outdir
-        self.dev_parsed = "%s/dev_parsed.conllu"%outdir
-        self.dev_parsed_x = "%s/dev_parsed.conllx"%outdir
+        self.outdir = outdir
 
-    def train_tagger(self):
-        self._tagger.train(self.treebank.trainfile)
+        #TODO: all of this is VERY confusing
 
-    def train_parser(self):
-        #TODO: problem: depends on parser which to use: conllu or conllx
-        self._parser.train(self.trainfile)
+        self.test_tagged = "%s/test_tagged.conllu"%outdir
+        self.testfile = self.treebank.testfile
+        self.test_parsed = "%s/test_parsed.conll"%outdir
 
-    def tag_test_files(self):
-        self._tagger.tag(self.treebank.devfile, self.devfile)
-        self._tagger.tag(self.treebank.testfile, self.testfile)
+        #need conllx for maltopt
+        if self.conllx:
+            self.trainfile = "%s/train.conll"%outdir
+            self.TT.transform(self.treebank.trainfile,self.trainfile,"to_conllx")
+            self.devfile = "%s/devfile.conll"%outdir
+            self.TT.transform(self.treebank.devfile,self.devfile,"to_conllx")
+            self.test_gold = "%s/test_gold.conllx"%outdir
+            self.TT.transform(self.testfile, self.test_gold, "to_conllx")
+        else:
+            self.trainfile = self.treebank.trainfile
+            self.devfile = self.treebank.devfile
+            self.test_gold = self.treebank.testfile
+        if parser == "malt":
+            self.test_tagged = self.devfile
+            self.test_gold = self.dev_gold
+            self.testfile = self.treebank.devfile
+
+    def train_tagger(self, devfile=None):
+        self._tagger.train(self.trainfile, devfile)
+
+    def train_parser(self, devfile=None):
+        self._parser.train(self.trainfile, devfile)
+
+    def tag_test_file(self):
+        self._tagger.tag(self.testfile, self.test_tagged)
+        if self.conllx:
+            self.test_tagged_x = "%s/test_tagged.conllx"%self.outdir
+            self.TT.transform(self.test_tagged,self.test_tagged_x,"to_conllx")
+            self.test_tagged = self.test_tagged_x
 
     def test_parser(self):
-        self._parser.parse(self.devfile, self.dev_parsed)
+        self._parser.parse(self.test_tagged, self.test_parsed)
