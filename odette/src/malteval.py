@@ -27,6 +27,7 @@ class Malteval(object):
         res = os.popen(cmd)
         accuracies = [line for line in res][2].strip("\n")
         UAS, LAS= accuracies.split("\t")[:2]
+        UAS, LAS = str(100*float(UAS)), str(100*float(LAS))
         return UAS, LAS
 
     def significance(self,gold,baseline,test):

@@ -53,7 +53,7 @@ def table_headers(exp_type, metric):
     if exp_type == "baseline":
         return "language;LAS;UAS\n"
     if exp_type == "tag_parse":
-        return "language;LAS;UAS\n"
+        return "language;LAS;UAS;POS\n"
     elif exp_type =="exp":
         return "language;baseline %s; transformed %s\n"%(metric,metric)
     elif exp_type =="stats":

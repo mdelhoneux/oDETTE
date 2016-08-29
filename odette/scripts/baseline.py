@@ -11,7 +11,7 @@
 
 import sys, os
 import config
-from src.malteval import Malteval
+from src.malteval import Malteval, pos_tagging_accuracy
 from src.parsers import MaltParser
 from src.treebank_transformer import TreebankTransformer
 from src.treebank_manager import TreebankManager
@@ -23,12 +23,13 @@ malteval = Malteval()
 def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS'):
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankManager(treebank_name,outdir)
-    #TM.train_tagger(devfile=TM.treebank.devfile)
-    #TM.train_parser(devfile=TM.devfile)
+    TM.train_tagger(devfile=TM.treebank.devfile)
+    TM.train_parser(devfile=TM.devfile)
     TM.tag_test_file()
     TM.test_parser()
     uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
-    output = "%s;%s;%s\n"%(treebank_name,las,uas)
+    tagging_accuracy = pos_tagging_accuracy(TM.test_gold,TM.test_parsed)
+    output = "%s;%s;%s;%s\n"%(treebank_name,las,uas, tagging_accuracy)
     return output
 
 
