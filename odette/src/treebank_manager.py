@@ -19,13 +19,13 @@ from src.UD_treebank import UDtreebank
 from src.treebank_transformer import TreebankTransformer
 
 class TreebankManager():
-    #TODO: change default parser back to maltparser
-    def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), parser="udpipe", outdir=None, tagger="udpipe"):
-        if not outdir: outdir= config.exp + treebank_name
+    def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), parser="maltOpt", outdir=None, tagger="udpipe"):
+        if not outdir: self.outdir= config.exp + treebank_name
         if not os.path.exists(outdir): os.mkdir(outdir)
         self.treebank = UDtreebank(treebank_name)
         self.conllx = False
         self.TT = TreebankTransformer(treebank_name=treebank_name)
+        self.parser_name = parser
         if parser == "malt":
             self._parser = MaltParser(name=treebank_name)
         elif parser == "maltOpt":
@@ -42,13 +42,13 @@ class TreebankManager():
             raise Exception, "Invalid tagger"
         self.treebank_name = treebank_name
         self._file_handler = file_handler
-        self.outdir = outdir
 
-        #TODO: all of this is VERY confusing -->find a way to clean
+        #TODO: all of this is VERY confusing -->either clean or remove need to
+        #use conllx at all
 
         self.test_tagged = "%s/test_tagged.conllu"%outdir
         self.testfile = self.treebank.testfile
-        self.test_parsed = "%s/test_parsed.conll"%outdir
+        self.test_parsed = "%s/test_parsed_%s.conll"%(outdir, self.parser_name)
         self.test_gold = "%s/test_gold.conllx"%outdir
         self.TT.transform(self.testfile, self.test_gold, "to_conllx")
 
@@ -61,7 +61,7 @@ class TreebankManager():
         else:
             self.trainfile = self.treebank.trainfile
             self.devfile = self.treebank.devfile
-        if parser == "malt":
+        if parser == "malt": #test on development file
             self.TT.transform(self.treebank.devfile,self.devfile,"to_conllx")
             self.test_gold = self.devfile
             self.testfile = self.treebank.devfile
@@ -82,6 +82,6 @@ class TreebankManager():
     def test_parser(self):
         self._parser.parse(self.test_tagged, self.test_parsed)
         if not self.conllx: #TODO: this is hacky, means if conllx has not been used so far
-            self.test_parsed_x = "%s/test_parsed.conllx"%self.outdir
+            self.test_parsed_x = "%s/test_parsed_%s.conllx"%(self.outdir, self.parser_name)
             self.TT.transform(self.test_parsed, self.test_parsed_x, "to_conllx")
             self.test_parsed = self.test_parsed_x

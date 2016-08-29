@@ -19,10 +19,9 @@ from src.UD_treebank import UDtreebank
 
 malteval = Malteval()
 
-#TODO: rename
-def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS'):
+def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udpipe"):
     if not outdir: outdir= config.exp + treebank_name + "/"
-    TM = TreebankManager(treebank_name,outdir)
+    TM = TreebankManager(treebank_name,outdir, parser=parser)
     TM.train_tagger(devfile=TM.treebank.devfile)
     TM.train_parser(devfile=TM.devfile)
     TM.tag_test_file()
@@ -32,9 +31,6 @@ def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS'):
     output = "%s;%s;%s;%s\n"%(treebank_name,las,uas, tagging_accuracy)
     return output
 
-
-
-#TODO: rename
 def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):
     if not outdir: outdir= config.exp + treebank_name
     TM = TreebankTransformer(treebank_name=treebank_name)

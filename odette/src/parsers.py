@@ -46,18 +46,12 @@ class MaltOptimizer(Parser):
         #TODO: move this to some bash script?
         owd = os.getcwd()
         os.chdir(self._path_to_malt_opt)
-        if devfile:
-            valid_command = "-v " + devfile
-        else:
-            valid_command = ""
         for i in range(1,4):
-            #TODO: erm I'm sure I can do that more neatly
-            if i == 1:
+            if i == 1 or not devfile:
                 v = ""
             else:
-                v  = valid_command
+                v = "-v" + devfile
             cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
-            print cmd
             os.system(cmd)
         cmd3 = "mv %sfinalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
         cmd4 = "mv %s.mco %s"%(self._name,owd)

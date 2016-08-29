@@ -34,9 +34,8 @@ class TreebankTransformer():
         self._file_handler = file_handler
         self._transformer=transformer
         self.trainfile = "%strain.conll"%self.outdir
-        #TODO: modify this shit
+        self.devfile = "%sdev_gold.conll"%self.outdir
         self.testfile = "%stest_gold.conll"%self.outdir
-        self.realtestfile = "%srealtest_gold.conll"%self.outdir
         self._dep_style = dep_style
         self._pos_style = pos_style
 
@@ -49,7 +48,7 @@ class TreebankTransformer():
         self.init_files_for_transformation()
         self.transform(self.trainfile, self.transformed_train, "transform")
         self._parser.train(self.transformed_train)
-        self._parser.parse(self.testfile,self.parsed_ms)
+        self._parser.parse(self.defvile,self.parsed_ms)
         self.transform(self.parsed_ms, self.parsed_ud, "detransform")
 
     def transform_detransform_trainfile(self):

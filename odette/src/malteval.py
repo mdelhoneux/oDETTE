@@ -5,7 +5,7 @@
 #date			:2015/12/30
 #version		:1.0
 #description	:Wrapper around MaltEval to facilitate writing to tables
-#usage			:python src/malteval.py gold test
+#usage			:python malteval.py gold test [tag: for pos tagging accuracy - parsing accuracy by default"
 #Python version :2.7.6
 #==============================================================================
 
@@ -91,9 +91,11 @@ def pos_tagging_accuracy(gold,test):
     return (correct/float(tot))*100
 
 if __name__=="__main__":
+    #usage: python malteval.py gold test [tag: for pos tagging accuracy - parsing accuracy by default"
     malteval = Malteval()
     gold = sys.argv[1]
     test = sys.argv[2]
-    print malteval.accuracy(gold,test)
-    #TODO: make this an option
-    #print pos_tagging_accuracy(gold,test)
+    if sys.argv[3] == "tag":
+        print pos_tagging_accuracy(gold,test)
+    else:
+        print malteval.accuracy(gold,test)
