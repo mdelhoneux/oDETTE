@@ -18,7 +18,7 @@ import multiprocessing
 import config
 import src.utils
 from scripts.preprocess_files import prepare_files
-from scripts.baseline import run_baseline, run_baseline_with_tagger
+from scripts.baseline import run_baseline, run_baseline_with_tagger, learning_curve
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
 from scripts.collect_stats import run_stats
 
@@ -31,6 +31,8 @@ def run(language, exp_type, metric, parser):
         return run_baseline(language,outdir=language_dir)
     elif exp_type == "tag_parse":
         return run_baseline_with_tagger(language, outdir=language_dir, parser=parser)
+    elif exp_type == "learning_curve":
+        return learning_curve(language,outdir=language_dir,parser=parser)
     elif exp_type == "prep":
         prepare_files(language,outdir=language_dir)
         return None
@@ -47,23 +49,22 @@ def run(language, exp_type, metric, parser):
     else:
         raise Exception, "Invalid exp_type"
 
+headers = {
+    "prep":"",
+    "baseline": "language;LAS;UAS\n",
+    "tag_parse": "language;LAS;UAS;UPOS;XPOS\n",
+    "learning_curve": "",
+    "stats": "language;n sentences; n tokens; aux freq \n",
+    "ms_gold": "language; LAS ; baseline LAS\n",
+    "non_proj": "language; gold nproj; ms nproj; backtransformation nproj \n",
+    "backtransf": "language;backtransformation accuracy\n",
+}
+
 def table_headers(exp_type, metric):
-    if exp_type == "prep":
-        return ""
-    if exp_type == "baseline":
-        return "language;LAS;UAS\n"
-    if exp_type == "tag_parse":
-        return "language;LAS;UAS;POS\n"
-    elif exp_type =="exp":
+    if exp_type =="exp":
         return "language;baseline %s; transformed %s\n"%(metric,metric)
-    elif exp_type =="stats":
-        return "language;n sentences; n tokens; aux freq \n"
-    elif exp_type == "ms_gold":
-        return "language; LAS ; baseline LAS\n"
-    elif exp_type == "non_proj":
-        return "language; gold nproj; ms nproj; backtransformation nproj \n"
-    elif exp_type == "backtransf":
-        return "language;backtransformation accuracy\n"
+    else:
+        return headers[exp_type]
 
 def parse_list_arg(l):
     """Return a list of line values if it's a file or a list of values if it
