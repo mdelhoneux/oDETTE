@@ -80,15 +80,17 @@ def pos_tagging_accuracy(gold,test):
     conll_reader = ConllFileHandler()
     gold_graphs = conll_reader.file_to_dg_list(gold)
     test_graphs = conll_reader.file_to_dg_list(test)
-    correct = 0
+    correct_u = 0
+    correct_x = 0
     tot = 0
     for ggraph, tgraph in zip(gold_graphs,test_graphs):
         for gdep, tdep in zip(ggraph, tgraph):
             tot += 1
+            if gdep.cpostag == tdep.cpostag:
+                correct_u += 1
             if gdep.postag == tdep.postag:
-            #if gdep.cpostag == tdep.cpostag:
-                correct += 1
-    return (correct/float(tot))*100
+                correct_x += 1
+    return (correct_u/float(tot))*100, (correct_x/float(tot))*100
 
 if __name__=="__main__":
     #usage: python malteval.py gold test [tag: for pos tagging accuracy - parsing accuracy by default"
