@@ -22,14 +22,36 @@ malteval = Malteval()
 def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udpipe"):
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankManager(treebank_name,outdir, parser=parser)
-    TM.train_tagger(devfile=TM.treebank.devfile)
-    TM.train_parser(devfile=TM.devfile)
+    #TODO: I might want to retrained it even if it's trained - then I should
+    #name it differently like with params or something
+    if not TM._tagger.is_trained():
+        TM.train_tagger(devfile=TM.treebank.devfile)
+    if not TM._parser.is_trained():
+        TM.train_parser(devfile=TM.devfile)
     TM.tag_test_file()
     TM.test_parser()
     uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
-    tagging_accuracy = pos_tagging_accuracy(TM.test_gold,TM.test_parsed)
-    output = "%s;%s;%s;%s\n"%(treebank_name,las,uas, tagging_accuracy)
+    upos, xpos = pos_tagging_accuracy(TM.test_gold,TM.test_parsed)
+    output = "%s;%s;%s;%s;%s\n"%(treebank_name,las,uas, upos,xpos)
     return output
+
+def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe'):
+    if not outdir: outdir= config.exp + treebank_name + "/"
+    TM = TreebankManager(treebank_name,outdir, parser=parser)
+    TM.split_training()
+    TM.tag_test_file()
+    lass = []
+    for i in range(1,len(self.splits)):
+        TM._parser.train(self.splits[i],devfile = TM.devfile)
+        TM.test_parser()
+        uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
+        lass.append(las)
+    #TODO: plot training size number instead of split n
+    from matplotlib import pyplot as plt
+    plt.plot(lass)
+    plt.savefig("./learning_curve.png")
+    return lass
+
 
 def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):
     if not outdir: outdir= config.exp + treebank_name
