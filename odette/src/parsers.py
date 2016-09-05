@@ -4,7 +4,7 @@
 #email			:miryam.de_lhoneux@lingfil.uu.se
 #date			:2015/12/30
 #version		:1.0
-#description	:Wrapper around existing parsers (only MaltParser for now)
+#description	:Wrapper around existing parsers
 #usage			:python src/parsers.py trainfile testfile outfile
 #Python version :2.7.6
 #==============================================================================
@@ -18,6 +18,8 @@ class Parser(object):
     def train(self, trainfile, devfile):
         raise NotImplementedError
     def parse(self, testfile, outfile):
+        raise NotImplementedError
+    def is_trained(self):
         raise NotImplementedError
 
 class MaltParser(Parser):
@@ -33,6 +35,9 @@ class MaltParser(Parser):
     def parse(self, testfile, outfile):
         cmd = "java -jar -Xmx2g %s -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
         os.system(cmd)
+
+    def is_trained(self):
+        return os.path.exists("%s%s"%(self._path_to_malt,self.name))
 
 class MaltOptimizer(Parser):
     #NOTE: does not support parallel training
@@ -51,13 +56,20 @@ class MaltOptimizer(Parser):
                 v = ""
             else:
                 v = "-v" + devfile
+            #NOTE: maltopt plays with java heap size so I don't think giving it
+            #more memory does anything at all
             cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
             os.system(cmd)
-        cmd3 = "mv %sfinalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
-        cmd4 = "mv %s.mco %s"%(self._name,owd)
+        #TODO: test this
+        cmd3 = "mv %s.*.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
+        cmd4 = "mv %s.*.txt %s%s"%(self._path_to_malt_opt, config.exp,self._name)
+        cmd5 = "mv %s.mco %s"%(self._name,owd)
         os.system(cmd3)
         os.system(cmd4)
+        os.system(cmd5)
         os.chdir(owd)
+        #TODO: erm -grl option surely optimized --> should not be added here - 
+        #need more for czech -- sometimes
         cmd2 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m learn -i %s -grl root"%(self._path_to_malt,config.exp,self._name, self._name, trainfile)
         os.system(cmd2)
 
@@ -65,6 +77,9 @@ class MaltOptimizer(Parser):
         #TODO: aaaah seriously Miryam
         cmd = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,config.exp,self._name, self._name, testfile, outfile)
         os.system(cmd)
+
+    def is_trained(self):
+        return os.path.exists("%s.mco"%self._name)
 
 class UDPipeParser(Parser):
     def __init__(self,path="./udpipe_parser"):
@@ -80,6 +95,9 @@ class UDPipeParser(Parser):
     def parse(self,testfile,outfile):
         cmd = "udpipe --parse %s %s >%s"%(self._path,testfile,outfile)
         os.system(cmd)
+
+    def is_trained(self):
+        return os.path.exists(self._path)
 
 
 if __name__=="__main__":
