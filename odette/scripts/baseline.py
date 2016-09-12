@@ -44,8 +44,13 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe',
     TM.tag_test_file()
     lass = []
     #TODO: name parsers differently
+    #-- need to harmonize the way I use name in parsers then
+    from copy import deepcopy
+    parser_name = deepcopy(TM._parser.name)
     for i in range(len(TM.splits)):
-        TM._parser.train(TM.splits[i],devfile = TM.devfile)
+        TM._parser.name = parser_name + str(TM.split_sizes[i])
+        if not TM._parser.is_trained():
+            TM._parser.train(TM.splits[i],devfile = TM.devfile)
         TM.test_parser()
         uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
         lass.append(las)
