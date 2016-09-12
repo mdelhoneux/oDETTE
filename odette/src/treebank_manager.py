@@ -91,9 +91,11 @@ class TreebankManager():
             self.TT.transform(self.test_parsed, self.test_parsed_x, "to_conllx")
             self.test_parsed = self.test_parsed_x
 
-    def split_training(self, n=10):
-        #TODO: I might want to have fixed split sizes if I want to do the same
-        #thing for several treebanks and compare
+    def split_training(self, n=10, split_sizes=None):
+        #TODO: clean this mess: there's a lot of similarity between the two
+        #functions
+        if split_sizes:
+            return self._split_training(split_sizes)
         self.splits = []
         self.split_sizes = []
         training_dgs = self._file_handler.file_to_dg_list(self.trainfile)
@@ -115,6 +117,30 @@ class TreebankManager():
             if next_split:
                 continue
         #running the whole training set
+        split_filename = "%ssplit_all"%(self.outdir)
+        self.split_sizes.append(tot_tokens)
+        self.splits.append(split_filename)
+        split_dgs = training_dgs
+        self._file_handler.dep_graphs_to_file(split_filename,split_dgs)
+
+    def _split_training(self,split_sizes):
+        training_dgs = self._file_handler.file_to_dg_list(self.trainfile)
+        self.split_sizes = split_sizes
+        self.splits = []
+        for split_size in split_sizes:
+            next_split = False
+            for sentence_number, dg in enumerate(training_dgs):
+                n_tokens = sum(len(dg) for dg in training_dgs[:sentence_number + 1])
+                if n_tokens/float(split_size) >=1:
+                    split_filename = "%ssplit_%s"%(self.outdir,split_size)
+                    self.splits.append(split_filename)
+                    split_dgs = training_dgs[:sentence_number + 1]
+                    self._file_handler.dep_graphs_to_file(split_filename,split_dgs)
+                    next_split = True
+                    break
+            if next_split:
+                continue
+        tot_tokens = sum(len(dg) for dg in training_dgs)
         split_filename = "%ssplit_all"%(self.outdir)
         self.split_sizes.append(tot_tokens)
         self.splits.append(split_filename)

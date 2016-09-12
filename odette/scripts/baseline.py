@@ -35,10 +35,18 @@ def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udp
     output = "%s;%s;%s;%s;%s\n"%(treebank_name,las,uas, upos,xpos)
     return output
 
-def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe'):
+def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe',
+                   split_sizes=None):
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankManager(treebank_name,outdir=outdir, parser=parser)
-    TM.split_training()
+    #TODO: move this either to config or to options
+    split_sizes = [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000]
+    if split_sizes:
+        TM.split_training(split_sizes=split_sizes)
+    else:
+        TM.split_training()
+    #not all will have been run with first method
+    tot_splits = len(TM.splits)
     TM.tag_test_file()
     lass = []
     #TODO: name parsers differently
@@ -47,14 +55,14 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe'):
         TM.test_parser()
         uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
         lass.append(las)
-    #TODO: plot training size number instead of split n
+    #TODO: this is ugly
     from src.utils import human_format
     split_sizes_str = [human_format(size) for size in TM.split_sizes]
     from matplotlib import pyplot as plt
-    plt.xticks(TM.split_sizes,split_sizes_str)
-    plt.plot(TM.split_sizes, lass)
+    plt.xticks(TM.split_sizes[:tot_splits],split_sizes_str[:tot_splits])
+    plt.plot(TM.split_sizes[:tot_splits], lass)
     plt.savefig("./learning_curve.png")
-    output = ";".join(split_sizes_str) +"\n" + ";".join(lass)
+    output = ";".join(split_sizes_str[:tot_splits]) +"\n" + ";".join(lass)
     return output
 
 
