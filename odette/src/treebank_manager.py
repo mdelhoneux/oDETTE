@@ -114,3 +114,9 @@ class TreebankManager():
                     break
             if next_split:
                 continue
+        #running the whole training set
+        split_filename = "%ssplit_all"%(self.outdir)
+        self.split_sizes.append(tot_tokens)
+        self.splits.append(split_filename)
+        split_dgs = training_dgs
+        self._file_handler.dep_graphs_to_file(split_filename,split_dgs)
