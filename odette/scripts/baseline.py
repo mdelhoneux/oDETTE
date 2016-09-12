@@ -41,16 +41,21 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe'):
     TM.split_training()
     TM.tag_test_file()
     lass = []
-    for i in range(1,len(TM.splits)):
+    #TODO: name parsers differently
+    for i in range(len(TM.splits)):
         TM._parser.train(TM.splits[i],devfile = TM.devfile)
         TM.test_parser()
         uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
         lass.append(las)
     #TODO: plot training size number instead of split n
+    from src.utils import human_format
+    split_sizes_str = [human_format(size) for size in TM.split_sizes]
     from matplotlib import pyplot as plt
-    plt.plot(lass)
+    plt.xticks(TM.split_sizes,split_sizes_str)
+    plt.plot(TM.split_sizes, lass)
     plt.savefig("./learning_curve.png")
-    return ";".join(lass)
+    output = ";".join(split_sizes_str) +"\n" + ";".join(lass)
+    return output
 
 
 def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):

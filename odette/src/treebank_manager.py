@@ -92,13 +92,25 @@ class TreebankManager():
             self.test_parsed = self.test_parsed_x
 
     def split_training(self, n=10):
+        #TODO: I might want to have fixed split sizes if I want to do the same
+        #thing for several treebanks and compare
         self.splits = []
+        self.split_sizes = []
         training_dgs = self._file_handler.file_to_dg_list(self.trainfile)
-        #TODO: this is splitting on number of sentences -> need to split on
-        #number of tokens I guess
-        split_size = int(len(training_dgs)/float(n))
+        tot_tokens = sum(len(dg) for dg in training_dgs)
+        split_size = int(tot_tokens/float(n))
         for i in range(1,n):
-           nf = "%s/split_%d"%(self.outdir,i)
-           self.splits.append(nf)
-           split_dgs = training_dgs[:i*split_size]
-           self._file_handler.dep_graphs_to_file(nf,split_dgs)
+            next_split = False
+            for sentence_number, dg in enumerate(training_dgs):
+                #number of tokens to current sentence number
+                n_tokens = sum(len(dg) for dg in training_dgs[:sentence_number + 1])
+                if n_tokens/float(split_size*i) >=1:
+                    split_filename = "%ssplit_%d"%(self.outdir,i)
+                    self.split_sizes.append(n_tokens)
+                    self.splits.append(split_filename)
+                    split_dgs = training_dgs[:sentence_number + 1]
+                    self._file_handler.dep_graphs_to_file(split_filename,split_dgs)
+                    next_split = True
+                    break
+            if next_split:
+                continue
