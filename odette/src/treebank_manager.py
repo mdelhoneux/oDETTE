@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #==============================================================================
-#author			:Miryam de Lhoneux
-#email			:miryam.de_lhoneux@lingfil.uu.se
-#date			:2016/08/23
-#version		:1.1
-#description	:A class to facilitate treebank managing
+#author         :Miryam de Lhoneux
+#email          :miryam.de_lhoneux@lingfil.uu.se
+#date           :2016/08/23
+#version        :1.1
+#description    :A class to facilitate treebank managing
 #               :It can also be used to run baselines
 #Python version :2.7.6
 #==============================================================================
@@ -20,8 +20,11 @@ from src.treebank_transformer import TreebankTransformer
 
 class TreebankManager():
     def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), parser="maltOpt", outdir=None, tagger="udpipe"):
-        if not outdir: self.outdir= config.exp + treebank_name
-        if not os.path.exists(outdir): os.mkdir(outdir)
+        if not outdir: outdir= config.exp + treebank_name
+        #import ipdb;ipdb.set_trace()
+        #if not outdir: self.outdir= config.exp + treebank_name + "/"
+        self.outdir = outdir
+        if not os.path.exists(self.outdir): os.mkdir(self.outdir)
         self.treebank = UDtreebank(treebank_name)
         self.conllx = False
         self.TT = TreebankTransformer(treebank_name=treebank_name)
@@ -67,9 +70,11 @@ class TreebankManager():
             self.testfile = self.treebank.devfile
 
     def train_tagger(self, devfile=None):
+        #TODO: this is actually pretty useless
         self._tagger.train(self.trainfile, devfile)
 
     def train_parser(self, devfile=None):
+        #TODO: this is actually pretty useless
         self._parser.train(self.trainfile, devfile)
 
     def tag_test_file(self):
@@ -85,3 +90,15 @@ class TreebankManager():
             self.test_parsed_x = "%s/test_parsed_%s.conllx"%(self.outdir, self.parser_name)
             self.TT.transform(self.test_parsed, self.test_parsed_x, "to_conllx")
             self.test_parsed = self.test_parsed_x
+
+    def split_training(self, n=10):
+        self.splits = []
+        training_dgs = self._file_handler.file_to_dg_list(self.trainfile)
+        #TODO: this is splitting on number of sentences -> need to split on
+        #number of tokens I guess
+        split_size = int(len(training_dgs)/float(n))
+        for i in range(1,n):
+           nf = "%s/split_%d"%(self.outdir,i)
+           self.splits.append(nf)
+           split_dgs = training_dgs[:i*split_size]
+           self._file_handler.dep_graphs_to_file(nf,split_dgs)

@@ -21,8 +21,8 @@ malteval = Malteval()
 
 def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udpipe"):
     if not outdir: outdir= config.exp + treebank_name + "/"
-    TM = TreebankManager(treebank_name,outdir, parser=parser)
-    #TODO: I might want to retrained it even if it's trained - then I should
+    TM = TreebankManager(treebank_name,outdir=outdir, parser=parser)
+    #TODO: I might want to retrain it even if it's trained - then I should
     #name it differently like with params or something
     if not TM._tagger.is_trained():
         TM.train_tagger(devfile=TM.treebank.devfile)
@@ -37,12 +37,12 @@ def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udp
 
 def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe'):
     if not outdir: outdir= config.exp + treebank_name + "/"
-    TM = TreebankManager(treebank_name,outdir, parser=parser)
+    TM = TreebankManager(treebank_name,outdir=outdir, parser=parser)
     TM.split_training()
     TM.tag_test_file()
     lass = []
-    for i in range(1,len(self.splits)):
-        TM._parser.train(self.splits[i],devfile = TM.devfile)
+    for i in range(1,len(TM.splits)):
+        TM._parser.train(TM.splits[i],devfile = TM.devfile)
         TM.test_parser()
         uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
         lass.append(las)
@@ -50,7 +50,7 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe'):
     from matplotlib import pyplot as plt
     plt.plot(lass)
     plt.savefig("./learning_curve.png")
-    return lass
+    return ";".join(lass)
 
 
 def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):

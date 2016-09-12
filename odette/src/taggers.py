@@ -26,11 +26,17 @@ class UDPipeTagger(Tagger):
             cmd = "udpipe --train --parser=none --tokenizer=none %s %s"%(self._path,trainfile)
         else:
             cmd = "udpipe --train --heldout=%s --parser=none --tokenizer=none %s %s"%(devfile, self._path,trainfile)
+            #TODO: need something different for Czech:
+                #udpipe --train --parser=none --tokenizer=none --tagger guesser_suffix_rules=5 guesser_enrich_dictionary=3 EXP/UD_Czech/udpipe-tagger $UDCz/cs-ud-train.conllu 
+
         os.system(cmd)
 
     def tag(self,testfile,outfile):
         cmd = "udpipe --tag %s %s >%s"%(self._path,testfile,outfile)
         os.system(cmd)
+
+    def is_trained(self):
+        return os.path.exists(self._path)
 
 if __name__=="__main__":
     import sys

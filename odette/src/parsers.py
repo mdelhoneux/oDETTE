@@ -29,11 +29,11 @@ class MaltParser(Parser):
         self.name = name
 
     def train(self, trainfile, devfile=None):
-        cmd = "java -jar -Xmx2g %s -c %s -m learn -i %s -grl root"%(self._path_to_malt, self.name, trainfile)
+        cmd = "java -jar -Xmx8g %s -c %s -m learn -i %s -grl root"%(self._path_to_malt, self.name, trainfile)
         os.system(cmd)
 
     def parse(self, testfile, outfile):
-        cmd = "java -jar -Xmx2g %s -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
+        cmd = "java -jar -Xmx8g %s -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
         os.system(cmd)
 
     def is_trained(self):
@@ -56,16 +56,16 @@ class MaltOptimizer(Parser):
                 v = ""
             else:
                 v = "-v" + devfile
-            #NOTE: maltopt plays with java heap size so I don't think giving it
-            #more memory does anything at all
             cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
             os.system(cmd)
-        #TODO: test this
-        cmd3 = "mv %s.*.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
-        cmd4 = "mv %s.*.txt %s%s"%(self._path_to_malt_opt, config.exp,self._name)
+
+        #TODO: this does not seem to work
+        #cmd3 = "mv %s.*.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
+        #cmd4 = "mv %s.*.txt %s%s"%(self._path_to_malt_opt, config.exp,self._name)
+        cmd3 = "mv %s/finalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self._name)
         cmd5 = "mv %s.mco %s"%(self._name,owd)
-        os.system(cmd3)
-        os.system(cmd4)
+        #os.system(cmd3)
+        #os.system(cmd4)
         os.system(cmd5)
         os.chdir(owd)
         #TODO: erm -grl option surely optimized --> should not be added here - 
@@ -79,6 +79,8 @@ class MaltOptimizer(Parser):
         os.system(cmd)
 
     def is_trained(self):
+        #TODO: actually this checks if MaltParser is trained -- do something
+        #about this
         return os.path.exists("%s.mco"%self._name)
 
 class UDPipeParser(Parser):
