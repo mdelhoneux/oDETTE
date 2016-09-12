@@ -39,13 +39,7 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe',
                    split_sizes=None):
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankManager(treebank_name,outdir=outdir, parser=parser)
-    #TODO: move this either to config or to options
-    split_sizes = [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000]
-    if split_sizes:
-        TM.split_training(split_sizes=split_sizes)
-    else:
-        TM.split_training()
-    #not all will have been run with first method
+    TM.split_training()
     tot_splits = len(TM.splits)
     TM.tag_test_file()
     lass = []
@@ -61,7 +55,7 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe',
     from matplotlib import pyplot as plt
     plt.xticks(TM.split_sizes[:tot_splits],split_sizes_str[:tot_splits])
     plt.plot(TM.split_sizes[:tot_splits], lass)
-    plt.savefig("./learning_curve.png")
+    plt.savefig("%slearning_curve.png"%outdir)
     output = ";".join(split_sizes_str[:tot_splits]) +"\n" + ";".join(lass)
     return output
 
