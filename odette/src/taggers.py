@@ -33,7 +33,7 @@ class UDPipeTagger(Tagger):
         os.system(cmd)
 
     def tag(self,testfile,outfile):
-        cmd = "udpipe --tag %s %s >%s"%(self._path,testfile,outfile)
+        cmd = "udpipe --tag %s%s %s >%s"%(self._path, self.name, testfile,outfile)
         os.system(cmd)
 
     def is_trained(self):
