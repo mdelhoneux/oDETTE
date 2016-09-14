@@ -91,13 +91,13 @@ class UDPipeParser(Parser):
 
     def train(self,trainfile, devfile=None):
         if not devfile:
-            cmd = "udpipe --train --tagger=none --tokenizer=none %s %s %s"%(self._path,self.name,trainfile)
+            cmd = "udpipe --train --tagger=none --tokenizer=none %s%s %s"%(self._path,self.name,trainfile)
         else:
-            cmd = "udpipe --train --heldout=%s --tagger=none --tokenizer=none %s %s %s"%(devfile,self._path, self.name, trainfile)
+            cmd = "udpipe --train --heldout=%s --tagger=none --tokenizer=none --parser run=1 %s%s %s"%(devfile,self._path, self.name, trainfile)
         os.system(cmd)
 
     def parse(self,testfile,outfile):
-        cmd = "udpipe --parse %s %s %s >%s"%(self._path, self.name,testfile,outfile)
+        cmd = "udpipe --parse %s%s %s >%s"%(self._path, self.name,testfile,outfile)
         os.system(cmd)
 
     def is_trained(self):

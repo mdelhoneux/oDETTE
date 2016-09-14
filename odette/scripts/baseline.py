@@ -35,16 +35,15 @@ def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udp
     output = "%s;%s;%s;%s;%s\n"%(treebank_name,las,uas, upos,xpos)
     return output
 
-def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe',
-                   split_sizes=None):
+def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe', split_sizes=None):
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankManager(treebank_name,outdir=outdir, parser=parser)
+    if not TM._tagger.is_trained():
+        TM.train_tagger(devfile=TM.treebank.devfile)
+    TM.tag_test_file()
     TM.split_training()
     tot_splits = len(TM.splits)
-    TM.tag_test_file()
     lass = []
-    #TODO: name parsers differently
-    #-- need to harmonize the way I use name in parsers then
     from copy import deepcopy
     parser_name = deepcopy(TM._parser.name)
     for i in range(len(TM.splits)):
@@ -54,13 +53,14 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe',
         TM.test_parser()
         uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
         lass.append(las)
-    #TODO: this is ugly
     from src.utils import human_format
     split_sizes_str = [human_format(size) for size in TM.split_sizes]
     from matplotlib import pyplot as plt
     plt.xticks(TM.split_sizes[:tot_splits],split_sizes_str[:tot_splits])
     plt.plot(TM.split_sizes[:tot_splits], lass)
-    plt.savefig("%slearning_curve.png"%outdir)
+    #TODO: I should stack several parsers on top of each other to properly see
+    #effects
+    plt.savefig("%slearning_curve%s.png"%(outdir,parser_name))
     output = ";".join(split_sizes_str[:tot_splits]) +"\n" + ";".join(lass)
     return output
 

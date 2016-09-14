@@ -18,14 +18,15 @@ class Tagger(object):
         raise NotImplementedError
 
 class UDPipeTagger(Tagger):
-    def __init__(self,path="./udpipe_tagger"):
+    def __init__(self,path="./", name="udpipe_tagger"):
         self._path = path
+        self.name = name
 
     def train(self,trainfile, devfile=None):
         if not devfile:
-            cmd = "udpipe --train --parser=none --tokenizer=none %s %s"%(self._path,trainfile)
+            cmd = "udpipe --train --parser=none --tokenizer=none %s%s %s"%(self._path,self.name, trainfile)
         else:
-            cmd = "udpipe --train --heldout=%s --parser=none --tokenizer=none %s %s"%(devfile, self._path,trainfile)
+            cmd = "udpipe --train --heldout=%s --parser=none --tokenizer=none %s%s %s"%(devfile, self._path, self.name, trainfile)
             #TODO: need something different for Czech:
                 #udpipe --train --parser=none --tokenizer=none --tagger guesser_suffix_rules=5 guesser_enrich_dictionary=3 EXP/UD_Czech/udpipe-tagger $UDCz/cs-ud-train.conllu 
 
@@ -36,7 +37,8 @@ class UDPipeTagger(Tagger):
         os.system(cmd)
 
     def is_trained(self):
-        return os.path.exists(self._path)
+        fullpath = self._path + self.name
+        return os.path.exists(fullpath)
 
 if __name__=="__main__":
     import sys

@@ -21,8 +21,6 @@ from src.treebank_transformer import TreebankTransformer
 class TreebankManager():
     def __init__(self,treebank_name=None,file_handler=ConllFileHandler(), parser="maltOpt", outdir=None, tagger="udpipe"):
         if not outdir: outdir= config.exp + treebank_name
-        #import ipdb;ipdb.set_trace()
-        #if not outdir: self.outdir= config.exp + treebank_name + "/"
         self.outdir = outdir
         if not os.path.exists(self.outdir): os.mkdir(self.outdir)
         self.treebank = UDtreebank(treebank_name)
@@ -35,12 +33,12 @@ class TreebankManager():
             self._parser = MaltOptimizer(name=treebank_name)
             self.conllx = True
         elif parser == "udpipe":
-            self._parser = UDPipeParser(path="%s/udpipe-parser"%outdir)
+            self._parser = UDPipeParser(path="%s"%outdir, name="udpipe-parser")
         else:
             raise Exception, "Invalid parser"
 
         if tagger == "udpipe":
-            self._tagger = UDPipeTagger(path="%s/udpipe-tagger"%outdir)
+            self._tagger = UDPipeTagger(path="%s"%outdir, name="udpipe-tagger")
         else:
             raise Exception, "Invalid tagger"
         self.treebank_name = treebank_name
