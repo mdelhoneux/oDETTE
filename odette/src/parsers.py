@@ -47,7 +47,6 @@ class MaltOptimizer(Parser):
         self.name = name
 
     def train(self, trainfile, devfile=None):
-        #TODO: (TODO REALLY LIKE REALLY TODO): WRONG use - correct that
         #TODO: this is so ugly it makes me cry
         #TODO: move this to some bash script?
         owd = os.getcwd()
@@ -58,25 +57,28 @@ class MaltOptimizer(Parser):
             else:
                 v = "-v" + devfile
             cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
-            os.system(cmd)
+            #TODO: uncomment
+            #os.system(cmd)
 
-        #TODO: this does not seem to work
-        #cmd3 = "mv %s.*.xml %s%s"%(self._path_to_malt_opt, config.exp,self.name)
-        #cmd4 = "mv %s.*.txt %s%s"%(self._path_to_malt_opt, config.exp,self.name)
-        cmd3 = "mv %s/finalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self.name)
-        cmd5 = "mv %s.mco %s"%(self.name,owd)
-        #os.system(cmd3)
-        #os.system(cmd4)
-        os.system(cmd5)
-        os.chdir(owd)
-        #TODO: erm -grl option surely optimized --> should not be added here - 
-        #need more for czech -- sometimes
-        cmd2 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m learn -i %s -grl root"%(self._path_to_malt,config.exp,self.name, self.name, trainfile)
+        optfile = open("phase3_optFile.txt", "r")
+        #take last line of file and take what's to the right of feat model option
+        feature_model = [line for line in optfile][-1].split("feature_model (-F):")[1].strip("\n")
+
+        cmd2 = "mv %s/finalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self.name)
+        cmd3 = "mv %s.mco %s"%(self.name,owd)
+        cmd4 = "mv %s %s"%(feature_model, owd)
         os.system(cmd2)
+        os.system(cmd3)
+        os.system(cmd4)
+        os.chdir(owd)
+        #need more for czech -- sometimes
+        #cmd2 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m learn -i %s "%(self._path_to_malt,config.exp,self.name, self.name, trainfile)
+        cmd5 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -F %s"%(self._path_to_malt,config.exp,self.name, self.name, feature_model)
+        os.system(cmd5)
 
     def parse(self,testfile,outfile):
         #TODO: aaaah seriously Miryam
-        cmd = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,config.exp,self.name, self.name, testfile, outfile)
+        cmd = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m parse -i %s -o %s"%(self._path_to_malt,config.exp,self.name, self.name, testfile, outfile)
         os.system(cmd)
 
     def is_trained(self):
