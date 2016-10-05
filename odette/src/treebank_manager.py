@@ -49,6 +49,7 @@ class TreebankManager():
 
         self.test_tagged = "%s/test_tagged.conllu"%outdir
         self.testfile = self.treebank.testfile
+        #TODO: name the outfile according to parsing model
         self.test_parsed = "%s/test_parsed_%s.conll"%(outdir, self.parser_name)
         self.test_gold = "%s/test_gold.conllx"%outdir
         self.TT.transform(self.testfile, self.test_gold, "to_conllx")
@@ -92,7 +93,7 @@ class TreebankManager():
     def split_training(self):
         training_dgs = self._file_handler.file_to_dg_list(self.trainfile)
         import numpy as np
-        self.split_sizes = np.arange(1000,15000,1000)
+        self.split_sizes = np.arange(1000,1500000,50000)
         self.splits = []
         for split_size in self.split_sizes:
             next_split = False

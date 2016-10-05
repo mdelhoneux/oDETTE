@@ -93,12 +93,14 @@ pos_disambig = {
     }
 }
 
+#def human_format(num):
+#    magnitude = 0
+#    while abs(num) >= 1000:
+#        magnitude += 1
+#        num /= 1000.0
+#    return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+#    #return '%d%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+
 def human_format(num):
-    """ stolen from
-    http://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
-    -- needs improving"""
-    magnitude = 0
-    while abs(num) >= 1000:
-        magnitude += 1
-        num /= 1000.0
-    return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+    num /= 1000.0
+    return "%dK"%num
