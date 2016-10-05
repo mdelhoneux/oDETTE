@@ -55,13 +55,7 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe', split
         lass.append(las)
     from src.utils import human_format
     split_sizes_str = [human_format(size) for size in TM.split_sizes]
-    from matplotlib import pyplot as plt
-    plt.xticks(TM.split_sizes[:tot_splits],split_sizes_str[:tot_splits])
-    plt.plot(TM.split_sizes[:tot_splits], lass)
-    #TODO: I should stack several parsers on top of each other to properly see
-    #effects
-    plt.savefig("%slearning_curve%s.png"%(outdir,parser_name))
-    output = ";".join(split_sizes_str[:tot_splits]) +"\n" + ";".join(lass)
+    output = treebank_name +";" + ";".join(lass) + "\n"
     return output
 
 
