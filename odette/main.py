@@ -17,6 +17,7 @@ import multiprocessing
 
 import config
 import src.utils
+from src.utils import human_format
 from scripts.preprocess_files import prepare_files
 from scripts.baseline import run_baseline, run_baseline_with_tagger, learning_curve
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
@@ -49,11 +50,14 @@ def run(language, exp_type, metric, parser):
     else:
         raise Exception, "Invalid exp_type"
 
+import numpy as np
+split_sizes = np.arange(1000,1500000,50000)
+split_sizes_str = "language;" + ";".join([human_format(size) for size in split_sizes]) + "\n"
 headers = {
     "prep":"",
     "baseline": "language;LAS;UAS\n",
     "tag_parse": "language;LAS;UAS;UPOS;XPOS\n",
-    "learning_curve": "",
+    "learning_curve": split_sizes_str,
     "stats": "language;n sentences; n tokens; aux freq \n",
     "ms_gold": "language; LAS ; baseline LAS\n",
     "non_proj": "language; gold nproj; ms nproj; backtransformation nproj \n",
