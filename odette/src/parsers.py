@@ -37,7 +37,8 @@ class MaltParser(Parser):
         os.system(cmd)
 
     def is_trained(self):
-        return os.path.exists("%s%s"%(self._path_to_malt,self.name))
+        #return os.path.exists("%s%s"%(self._path_to_malt,self.name))
+        return os.path.exists("%smco"%self.name)
 
 class MaltOptimizer(Parser):
     #NOTE: does not support parallel training
@@ -57,8 +58,7 @@ class MaltOptimizer(Parser):
             else:
                 v = "-v" + devfile
             cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
-            #TODO: uncomment
-            #os.system(cmd)
+            os.system(cmd)
 
         optfile = open("phase3_optFile.txt", "r")
         #take last line of file and take what's to the right of feat model option
@@ -72,13 +72,12 @@ class MaltOptimizer(Parser):
         os.system(cmd4)
         os.chdir(owd)
         #need more for czech -- sometimes
-        #cmd2 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m learn -i %s "%(self._path_to_malt,config.exp,self.name, self.name, trainfile)
-        cmd5 = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -F %s"%(self._path_to_malt,config.exp,self.name, self.name, feature_model)
+        cmd5 = "java -jar -Xmx8g %s -f %s%s/finalOptionsFile.xml -c %s -F %s"%(self._path_to_malt,config.exp,self.name, self.name, feature_model)
         os.system(cmd5)
 
     def parse(self,testfile,outfile):
         #TODO: aaaah seriously Miryam
-        cmd = "java -jar -Xmx2g %s -f %s%s/finalOptionsFile.xml -c %s -m parse -i %s -o %s"%(self._path_to_malt,config.exp,self.name, self.name, testfile, outfile)
+        cmd = "java -jar -Xmx8g %s -f %s%s/finalOptionsFile.xml -c %s -m parse -i %s -o %s"%(self._path_to_malt,config.exp,self.name, self.name, testfile, outfile)
         os.system(cmd)
 
     def is_trained(self):

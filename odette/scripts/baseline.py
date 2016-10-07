@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #==============================================================================
-#author			:Miryam de Lhoneux
-#email			:miryam.de_lhoneux@lingfil.uu.se
-#date			:2015/12/30
-#version		:1.0
-#description	:Run a baseline parser
-#usage			:python baseline.py treebank_name trainfile testfile
+#author         :Miryam de Lhoneux
+#email          :miryam.de_lhoneux@lingfil.uu.se
+#date           :2015/12/30
+#version        :1.0
+#description    :Run a baseline parser
+#usage          :python baseline.py treebank_name trainfile testfile
 #Python version :2.7.6
 #==============================================================================
 
@@ -35,7 +35,29 @@ def run_baseline_with_tagger(treebank_name,outdir=None,metric='LAS', parser="udp
     output = "%s;%s;%s;%s;%s\n"%(treebank_name,las,uas, upos,xpos)
     return output
 
+def error_analysis(treebank_name, outdir=None,parser="udpipe"):
+    #TODO: rename
+    TM = TreebankManager(treebank_name, outdir=outdir,parser=parser)
+    #do it only if file empty?
+    TM.tag_test_file()
+    TM.test_parser()
+    import numpy as np
+    lengths = [str(i) for i in np.arange(5,50,5)]
+    lass = []
+    for length in lengths:
+        uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed,maxSenLen=length)
+        if las:
+            lass.append(las)
+    #get no lim
+    uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
+    lass.append(las)
+    output = treebank_name +";" + ";".join(lass) + "\n"
+    return output
+
+
 def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe', split_sizes=None):
+    from joblib import Parallel, delayed
+    import multiprocessing
     if not outdir: outdir= config.exp + treebank_name + "/"
     TM = TreebankManager(treebank_name,outdir=outdir, parser=parser)
     if not TM._tagger.is_trained():
@@ -43,20 +65,31 @@ def learning_curve(treebank_name,outdir=None,metric='LAS',parser='udpipe', split
     TM.tag_test_file()
     TM.split_training()
     tot_splits = len(TM.splits)
-    lass = []
     from copy import deepcopy
     parser_name = deepcopy(TM._parser.name)
-    for i in range(len(TM.splits)):
-        TM._parser.name = parser_name + str(TM.split_sizes[i])
-        if not TM._parser.is_trained():
-            TM._parser.train(TM.splits[i],devfile = TM.devfile)
-        TM.test_parser()
-        uas, las= malteval.accuracy(TM.test_gold,TM.test_parsed)
+
+    num_cores = multiprocessing.cpu_count()
+    #this does not work - possibly because I work on same files - if I 
+    #just do the training in parallel then I might solve this 
+    tms = Parallel(n_jobs=num_cores)(delayed(run_for_a_split)(i, deepcopy(TM), parser_name) for i in range(tot_splits))
+    #THIS works but it does the SAME!
+    lass = []
+    #import ipdb;ipdb.set_trace()
+    for tm in tms:
+#        las = run_for_a_split(i,TM,parser_name)
+        uas, las= malteval.accuracy(tm.test_gold,tm.test_parsed)
         lass.append(las)
-    from src.utils import human_format
-    split_sizes_str = [human_format(size) for size in TM.split_sizes]
     output = treebank_name +";" + ";".join(lass) + "\n"
     return output
+
+def run_for_a_split(i, TM, parser_name):
+    TM.parser_name = parser_name + str(TM.split_sizes[i])
+    #TODO: OUPS fix this
+    TM._parser.name = TM.parser_name
+    if not TM._parser.is_trained():
+        TM._parser.train(TM.splits[i],devfile = TM.devfile)
+        TM.test_parser()
+    return TM
 
 
 def run_baseline(treebank_name, outdir=None, trainfile=None, testfile=None):

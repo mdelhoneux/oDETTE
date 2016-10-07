@@ -59,7 +59,7 @@ class ConllFileHandler(object):
             dep_dict[self.conll[n]] = value
         dep = Dependency()
         for col in dep_dict:
-            if (col is "ID") or (col is "head"):
+            if (col == "ID") or (col == "head"):
                 try:
                     setattr(dep, col, int(dep_dict[col]))
                     setattr(dep, 'split_word', False) #maybe I shouldnt do this but check if attribute exists instead
