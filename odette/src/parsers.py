@@ -38,7 +38,7 @@ class MaltParser(Parser):
 
     def is_trained(self):
         #return os.path.exists("%s%s"%(self._path_to_malt,self.name))
-        return os.path.exists("%smco"%self.name)
+        return os.path.exists("%s.mco"%self.name)
 
 class MaltOptimizer(Parser):
     #NOTE: does not support parallel training
@@ -57,22 +57,27 @@ class MaltOptimizer(Parser):
                 v = ""
             else:
                 v = "-v" + devfile
-            cmd = "java -jar %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
+            cmd = "java -jar -Xmx2g %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
             os.system(cmd)
 
+        treebank_dir = config.exp +  self.name
         optfile = open("phase3_optFile.txt", "r")
         #take last line of file and take what's to the right of feat model option
         feature_model = [line for line in optfile][-1].split("feature_model (-F):")[1].strip("\n")
 
-        cmd2 = "mv %s/finalOptionsFile.xml %s%s"%(self._path_to_malt_opt, config.exp,self.name)
+        cmd2 = "mv %s/finalOptionsFile.xml %s"%(self._path_to_malt_opt, treebank_dir)
         cmd3 = "mv %s.mco %s"%(self.name,owd)
-        cmd4 = "mv %s %s"%(feature_model, owd)
+        cmd4 = "cp %s %s"%(feature_model, treebank_dir)
+        cmd5 = 'for i in $(seq 1 3); do end="_optFile.txt"; mv phase$i$end %s;done'%treebank_dir
+        cmd6 = 'for i in $(seq 1 3); do end="_logFile.txt"; mv phase$i$end %s;done'%treebank_dir
         os.system(cmd2)
         os.system(cmd3)
         os.system(cmd4)
+        os.system(cmd5)
+        os.system(cmd6)
         os.chdir(owd)
         #need more for czech -- sometimes
-        cmd5 = "java -jar -Xmx8g %s -f %s%s/finalOptionsFile.xml -c %s -F %s"%(self._path_to_malt,config.exp,self.name, self.name, feature_model)
+        cmd5 = "java -jar -Xmx2g %s -f %s/finalOptionsFile.xml -c %s_maltopt -F %s/%s"%(self._path_to_malt,treebank_dir, self.name, treebank_dir,feature_model)
         os.system(cmd5)
 
     def parse(self,testfile,outfile):
@@ -83,7 +88,7 @@ class MaltOptimizer(Parser):
     def is_trained(self):
         #TODO: actually this checks if MaltParser is trained -- do something
         #about this
-        return os.path.exists("%s.mco"%self.name)
+        return os.path.exists("%s_maltopt.mco"%self.name)
 
 class UDPipeParser(Parser):
     def __init__(self,name="udpipe_parser",path="./"):
