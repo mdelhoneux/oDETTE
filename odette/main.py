@@ -135,7 +135,8 @@ if __name__=="__main__":
     #run everything
     if parallel:
         num_cores = multiprocessing.cpu_count()
-        results = Parallel(n_jobs=num_cores)(delayed(run)(language,exp_type,metric, parser) for language in l_considered)
+        njobs = min(num_cores, len(l_considered))
+        results = Parallel(n_jobs=njobs)(delayed(run)(language,exp_type,metric, parser) for language in l_considered)
         for result in results:
             if result: #accounting for None returned in prep
                 resfile.write(result)
