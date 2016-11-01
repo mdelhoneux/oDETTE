@@ -19,7 +19,7 @@ import config
 import src.utils
 from src.utils import human_format
 from scripts.preprocess_files import prepare_files
-from scripts.baseline import run_baseline, run_baseline_with_tagger, learning_curve, error_analysis
+from scripts.baseline import run_baseline, run_baseline_with_tagger, learning_curve, error_analysis, optimize_udpipe
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
 from scripts.collect_stats import run_stats
 
@@ -32,6 +32,8 @@ def run(language, exp_type, metric, parser):
         return run_baseline(language,outdir=language_dir)
     elif exp_type == "tag_parse":
         return run_baseline_with_tagger(language, outdir=language_dir, parser=parser)
+    elif exp_type == "opt_udpipe":
+        return optimize_udpipe(language, outdir=language_dir, parser=parser)
     elif exp_type == "learning_curve":
         return learning_curve(language,outdir=language_dir,parser=parser)
     elif exp_type == "error_analysis":
@@ -63,6 +65,7 @@ headers = {
     "prep":"",
     "baseline": "language;LAS;UAS\n",
     "tag_parse": "language;LAS;UAS;UPOS;XPOS\n",
+    "opt_udpipe": "language;run_n\n",
     "learning_curve": split_sizes_str,
     "error_analysis": senlen_str,
     "stats": "language;n sentences; n tokens; aux freq \n",

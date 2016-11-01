@@ -68,14 +68,18 @@ class TreebankManager():
         #    self.TT.transform(self.treebank.devfile,self.devfile,"to_conllx")
         #    self.test_gold = self.devfile
         #    self.testfile = self.treebank.devfile
+        if not self.devfile :
+            self.test_gold = self.devfile
+            self.testfile = self.treebank.devfile
+
 
     def train_tagger(self, devfile=None):
         #TODO: this is actually pretty useless
-        self._tagger.train(self.trainfile, devfile)
+        self._tagger.train(self.trainfile, self.devfile)
 
     def train_parser(self, devfile=None):
         #TODO: this is actually pretty useless
-        self._parser.train(self.trainfile, devfile)
+        self._parser.train(self.trainfile, self.devfile)
 
     def tag_test_file(self):
         self._tagger.tag(self.testfile, self.test_tagged)
@@ -98,7 +102,7 @@ class TreebankManager():
             self.test_parsed = self.test_parsed_x
 
     def split_training(self):
-        #TODO: this needs to be tested
+        #TODO: this is extremely inefficient for obscure reasons
         training_dgs = self._file_handler.file_to_dg_list(self.trainfile)
         from random import shuffle
         shuffle(training_dgs)
