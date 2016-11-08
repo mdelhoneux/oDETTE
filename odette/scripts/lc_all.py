@@ -1,15 +1,15 @@
 from matplotlib import pyplot as plt
 import numpy as np
-malt = [line.strip("\n").split(";") for line in open("RES/learning_curve/zoom/malt_learning_curve.csv", "r")]
-udp = [line.strip("\n").split(";") for line in open("RES/learning_curve/zoom/udpipe_learning_curve.csv", "r")]
+malt = [line.strip("\n").split(";") for line in open("RES/learning_curve/malt_learning_curve.csv", "r")]
+udp = [line.strip("\n").split(";") for line in open("RES/learning_curve/udpipe_learning_curve.csv", "r")]
 
 sizes = malt[0][1:]
 maltd = {}
 udpd = {}
-fig, axes = plt.subplots(2, 4, sharey='row')
-((ax1, ax2, ax3, ax4), (ax5, ax6, ax7, ax8)) = axes
+fig, axes = plt.subplots(2, 3, sharey='row')
+((ax1, ax2, ax3), (ax4, ax5, ax6)) = axes
 
-all_axes = [ax1,ax2,ax3,ax4,ax5,ax6,ax7,ax8]
+all_axes = [ax1,ax2,ax3,ax4,ax5,ax6]
 
 axes[0][0].set_ylim([1,100])
 axes[1][0].set_ylim([1,100])
@@ -22,17 +22,19 @@ for i in range(1,len(udp)):
 
 
 for n, language in enumerate(udpd):
+    if language in ["UD_Tamil", "UD_Kazakh"]:
+        break
     sizes_l = sizes[:len(udpd[language])]
     n_sizes = [i for i in range(len(sizes_l))]
     plt.sca(all_axes[n])
     plt.xticks(n_sizes,sizes_l, rotation=45)
-    all_axes[n].set_title(language)
+    all_axes[n].set_title(language.strip("UD_"))
     #for full thing
-    #if language=="UD_Czech":
-    for label in all_axes[n].get_xticklabels()[::2]:
-        label.set_visible(False)
+    if language=="UD_Czech":
+        for label in all_axes[n].get_xticklabels()[::2]:
+            label.set_visible(False)
     try:
-        if n == len(udpd) -1:
+        if n == len(udpd) -3:
             plt.plot(n_sizes, udpd[language], label='udpipe')
             plt.plot(n_sizes, maltd[language], label='maltparser')
         else:
@@ -42,8 +44,8 @@ for n, language in enumerate(udpd):
     except:
         KeyError
 
-plt.legend(bbox_to_anchor=(-1.8, 2.4), loc=2, borderaxespad=0.)
+plt.legend(bbox_to_anchor=(-1.1, 2.4), loc=2, borderaxespad=0.)
 fig.text(0.5, 0.04, 'Training size', ha='center')
 fig.text(0.04, 0.5, 'LAS', va='center', rotation='vertical')
 plt.show()
-fig.savefig("./Figures/learning_curve/zoom_learning_curve.png")
+fig.savefig("./Figures/learning_curve/learning_curve.png")
