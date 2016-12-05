@@ -13,21 +13,31 @@
 import config
 import os
 import sys
+import numpy as np
 
 class Malteval(object):
     #TODO: this is all very inelegant - expose more options
     def __init__(self, location=config.malteval):
         self._location = location
 
-    def accuracy(self,gold,test, exclude_punct=False):
+    def accuracy(self,gold,test, exclude_punct=True, maxSenLen=None, minSenLen=None):
         """UAS and LAS of test on gold"""
         cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --row-header 0 --tab 1 --header-info 0 --Metric 'LAS;UAS'"%(self._location,gold,test)
         if exclude_punct:
-            cmd += " --ExcludeDeprels 'punct'"
+            cmd += " --ExcludeUnicodePunc 1"
+        if maxSenLen:
+            cmd += " --MaxSentenceLength " + str(maxSenLen)
+        if minSenLen:
+            cmd += " --MinSentenceLength " + str(minSenLen)
         res = os.popen(cmd)
         accuracies = [line for line in res][2].strip("\n")
+        #import ipdb;ipdb.set_trace()
         UAS, LAS= accuracies.split("\t")[:2]
-        UAS, LAS = str(100*float(UAS)), str(100*float(LAS))
+        try:
+            UAS, LAS = str(100*float(UAS)), str(100*float(LAS))
+        #TODO: better fix this is hacky
+        except ValueError:
+            return None, None
         return UAS, LAS
 
     def significance(self,gold,baseline,test):
@@ -69,8 +79,57 @@ class Malteval(object):
     def deprel_matrix(self,gold,test):
         """Matrix of accuracy of dependency relations"""
         cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy Deprel:all --tab 1 --header-info 0"%(self._location,gold,test)
+        #TODO: fix this
+        #cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy RelationLength --tab 1 --header-info 0"%(self._location,gold,test)
         res = os.popen(cmd)
         return [[value for value in line.split("\t")] for line in res][2:]
+
+    def pos_matrix(self,gold,test):
+        """Matrix of accuracy of dependency relations"""
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy Cpostag:all --tab 1 --header-info 0 "%(self._location,gold,test)
+        #import ipdb; ipdb.set_trace()
+        res = os.popen(cmd)
+        return [[value for value in line.split("\t")] for line in res][2:]
+
+    def relation_length(self,gold,test):
+        #TODO: fix
+        #cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy RelationLength --tab 1 --header-info 0"%(self._location,gold,test)
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy GroupedRelationLength --tab 1 --header-info 0"%(self._location,gold,test)
+        res = os.popen(cmd)
+        return [[value for value in line.strip("\n").split("\t")] for line in res][2:]
+
+    def distance_to_root(self,gold,test):
+        #TODO: fix
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy ArcDepth --tab 1 --header-info 0"%(self._location,gold,test)
+        res = os.popen(cmd)
+        return [[value for value in line.strip("\n").split("\t")] for line in res][2:]
+
+    def projectivity(self,gold,test):
+        #TODO: fix
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy ArcProjectivity --tab 1 --header-info 0"%(self._location,gold,test)
+        res = os.popen(cmd)
+        return [[value for value in line.strip("\n").split("\t")] for line in res][2:]
+
+    def sentence_length(self,gold,test):
+        cmd = "java -jar -Xmx2g %s/MaltEval.jar -g %s -s %s --GroupBy SentenceLength --tab 1 --header-info 0"%(self._location,gold,test)
+        res = os.popen(cmd)
+        #import ipdb;ipdb.set_trace()
+        return [[value for value in line.strip("\n").split("\t")] for line in res][2:]
+
+    def binned_sentence_length(self,gold,test):
+        bins = [i for i in range(0,150,10)]
+        accuracies = []
+        for i in range(len(bins)-1):
+            minLen = bins[i]
+            maxLen = bins[i+1]
+            UAS, LAS = self.accuracy(gold, test, maxSenLen=maxLen, minSenLen=minLen)
+            if LAS:
+                accuracies.append(LAS)
+            #when you get to 0
+            else:
+                return zip(accuracies, bins[1:i+1])
+        return zip(accuracies, bins[1:])
+
 
 #--------------
 def pos_tagging_accuracy(gold,test):
@@ -97,7 +156,8 @@ if __name__=="__main__":
     malteval = Malteval()
     gold = sys.argv[1]
     test = sys.argv[2]
-    if sys.argv[3] == "tag":
+    if len(sys.argv)>3 and sys.argv[3] == "tag":
         print pos_tagging_accuracy(gold,test)
     else:
         print malteval.accuracy(gold,test)
+        #res = malteval.relation_length(gold,test)

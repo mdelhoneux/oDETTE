@@ -19,9 +19,10 @@ import config
 from src.malteval import Malteval
 
 def plot_dep_scores(indir, treebank_number, dep, fig=None, outfile='Figures/figure.png'):
-    gold = indir + 'test_gold.conll'
-    baseline = indir + 'dev_parsed_baseline.conll'
-    transf = indir + 'dev_parsed.ud.conll'
+    gold = indir + '/dev_gold.conll'
+    #for conv (erm) baseline = malt, transf = udpipe
+    baseline = indir + '/dev_parsed_maltOpt.conll'
+    transf = indir + '/dev_parsed_udpipe.conll'
 
     malteval = Malteval()
     mb = malteval.deprel_matrix(gold,baseline)
@@ -64,35 +65,33 @@ def plot_dep_scores(indir, treebank_number, dep, fig=None, outfile='Figures/figu
 
 
     ax.bar(index,f1, bar_width,
-           color='darkblue',
+           color='#000034',
            error_kw=error_config,
            yerr=me1,
-           label = 'baseline' if treebank_number == 0 else "",
+           label = 'malt' if treebank_number == 0 else "",
           )
 
     ax.bar(index + bar_width ,f2, bar_width,
-           color='skyblue',
+           color='#3399ff',
            error_kw=error_config,
            yerr=me2,
-           label = 'transformed' if treebank_number == 0 else "",
+           label = 'udpipe' if treebank_number == 0 else "",
           )
 
     if treebank_number == 0:
         plt.xlabel('%s deprel'%dep)
         plt.ylabel('Attachment score')
 
-        plt.legend(bbox_to_anchor=(0.95, 0.92),
-                   bbox_transform=plt.gcf().transFigure)
+        plt.legend(bbox_to_anchor=(1.1, 1.05))
     return (fig, ax)
 
 if __name__=="__main__":
-    dep = "punct"
+    dep = sys.argv[1]
     exp = config.exp
-    ln = 0 #language counter
-    outf = "Figures/figure5.png"
+    outf = "Figures/%s.png"%dep
     prev_fig = None
-    l_considered = [line.strip("\n") for line in open("include.txt", "r")]
-    for language in l_considered:
+    l_considered = [line.strip("\n") for line in open("selection.txt", "r")]
+    for ln, language in enumerate(l_considered):
         ldir = exp + "/" + language + "/"
         (fig, ax) = plot_dep_scores(ldir, ln, dep, prev_fig, outfile=outf)
         prev_fig = fig
@@ -101,5 +100,4 @@ if __name__=="__main__":
             label_places = [i * 1.35 + 0.45 for i in range(len(labels))]
             ax.set_xticks(label_places)
             ax.set_xticklabels(labels, rotation='vertical')
-        ln+=1
     fig.savefig(outf, bbox_inches='tight')

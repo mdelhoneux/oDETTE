@@ -8,7 +8,6 @@ import config
 from src.malteval import Malteval
 
 def dir_to_plot(indir, outfile='Figures/deprel.png'):
-        #TODO: rewrite this
         #TODO: rename
         gold = indir + '/dev_gold.conll'
         #for conv (erm) baseline = malt, transf = udpipe
@@ -16,45 +15,43 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
         transf = indir + '/dev_parsed_udpipe.conll'
 
         malteval = Malteval()
-        mb = malteval.pos_matrix(gold,baseline)
-        mt = malteval.pos_matrix(gold,transf)
-        #import ipdb; ipdb.set_trace()
+        mb = malteval.deprel_matrix(gold,baseline)
+        mt = malteval.deprel_matrix(gold,transf)
     
         """The matplotlib thing"""
         #Note: I am taking the parser accuracy and the parsercounter
+        #TODO: discard if 0
     
         #I was assuming x is always the same but somehow for tamil this is not the case
-        x1 = np.array([malt[3].strip("\n") for malt in mb])
-        x2= np.array([malt[3].strip("\n") for malt in mt])
+        x1 = np.array([malt[6].strip("\n") for malt in mb])
+        x2= np.array([malt[6].strip("\n") for malt in mt])
         x = x1
 
         p1 = np.array([float(malt[0]) if malt[0] is not "-" else 0. for malt in mb])
         p2 = np.array([float(malt[0]) if malt[0] is not "-" else 0. for malt in mt])
 
         #import ipdb; #ipdb.set_trace()
-        #note n = correct counter
+        r1 = np.array([float(malt[1]) if malt[1] is not "-" else 0. for malt in mb])
+        r2 = np.array([float(malt[1]) if malt[1] is not "-" else 0. for malt in mt])
+        f1 = np.array([(2*p*r/(p+r)) if 0. not in (p,r) else 0. for p,r in zip(p1,r1)])
+        f2 = np.array([(2*p*r/(p+r)) if 0. not in (p,r) else 0. for p,r in zip(p2,r2)])
         n1 = np.array([int(malt[2]) if malt[2] is not "-" else 0 for malt in mb])
         n2 = np.array([int(malt[2]) if malt[2] is not "-" else 0 for malt in mt])
-
-        #hack
-        f1 = p1
-        f2 = p2
+        #TODO: is this correct now?? or should n be the treebank counter?
+        st1 = np.array([sqrt(f*(1-f)/n) if f != 0 else 0. for f,n in zip(f1, n1)]) #oh python, the things you let me do
+        st2 = np.array([sqrt(f*(1-f)/n) if f != 0 else 0. for f,n in zip(f2, n2)])
     
         #next = wikipedia
         me1 = np.array([0.98/sqrt(n) if n != 0 else 0. for n in n1])
         me2 = np.array([0.98/sqrt(n) if n!= 0 else 0. for n in n2])
-        #this other formula would need the standard deviation not standard error
-        #me1 = np.array([1.96*(st/sqrt(n)) if n != 0 else 0. for st,n in zip(st1,n1)])
-        #me2 = np.array([1.96*(st/sqrt(n)) if n != 0 else 0. for st,n in zip(st2,n2)])
-        st1 = np.array([sqrt(f*(1-f)/n) if f != 0 else 0. for f,n in zip(f1, n1)]) #oh python, the things you let me do
-        st2 = np.array([sqrt(f*(1-f)/n) if f != 0 else 0. for f,n in zip(f2, n2)])
     
+        #filter out infrequent stuff 
+        #n1 = np.array([i for i in n2 if i>10]) #does not seem to work
         inds = n1.argsort()[::-1] #index in inversed order
         #import ipdb; ipdb.set_trace()
         x = x[inds]
         #f1 = [i*100 for i in f1]
         #f2 = [i*100 for i in f2]
-
 
         f1 = f1[inds]
         #import ipdb; ipdb.set_trace()
@@ -91,7 +88,7 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
                              label = 'udpipe',
                              )
     
-        plt.xlabel('POS tag')
+        plt.xlabel('Deprel')
         plt.ylabel('Attachment score')
         axes = plt.gca()
         axes.set_ylim([0,1])
@@ -99,7 +96,6 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
         plt.legend(bbox_to_anchor=(1.1, 1.05))
         #plt.tight_layout()
         plt.title(indir.split("UD_")[1].strip("/"))
-        #plt.title("Slovenian original")
         plt.savefig(outfile)
         #plt.show()
         plt.clf()
@@ -108,5 +104,5 @@ if __name__=="__main__":
     exp = config.exp
     for language in os.listdir(exp):
         ldir = exp + "/" + language
-        outf = "./Figures/postag_%s"%language
+        outf = "./Figures/deprels_%s"%language
         dir_to_plot(ldir, outfile=outf)
