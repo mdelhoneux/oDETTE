@@ -7,7 +7,7 @@ from math import sqrt
 import config
 from src.malteval import Malteval
 
-def dir_to_plot(indir, outfile='Figures/deprel.png'):
+def dir_to_plot(indir, outfile='Figures/deprel.png', maxN=100):
         #TODO: rename
         gold = indir + '/dev_gold.conll'
         #for conv (erm) baseline = malt, transf = udpipe
@@ -45,10 +45,8 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
         me1 = np.array([0.98/sqrt(n) if n != 0 else 0. for n in n1])
         me2 = np.array([0.98/sqrt(n) if n!= 0 else 0. for n in n2])
     
-        #filter out infrequent stuff 
-        #n1 = np.array([i for i in n2 if i>10]) #does not seem to work
         inds = n1.argsort()[::-1] #index in inversed order
-        #import ipdb; ipdb.set_trace()
+        inds = inds[:maxN] #only take up to maxN deps
         x = x[inds]
         #f1 = [i*100 for i in f1]
         #f2 = [i*100 for i in f2]
@@ -88,14 +86,15 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
                              label = 'udpipe',
                              )
     
-        plt.xlabel('Deprel')
+        plt.xlabel('Dependency Relations')
         plt.ylabel('Attachment score')
         axes = plt.gca()
         axes.set_ylim([0,1])
         plt.xticks(index + bar_width, x, rotation='vertical')
-        plt.legend(bbox_to_anchor=(1.1, 1.05))
-        #plt.tight_layout()
-        plt.title(indir.split("UD_")[1].strip("/"))
+        plt.legend(bbox_to_anchor=(0.45, 1.05), loc=2, borderaxespad=0.)
+        #plt.title(indir.split("UD_")[1].strip("/"))
+        plt.autoscale(axis='x')
+        plt.tight_layout()
         plt.savefig(outfile)
         #plt.show()
         plt.clf()
@@ -104,5 +103,5 @@ if __name__=="__main__":
     exp = config.exp
     for language in os.listdir(exp):
         ldir = exp + "/" + language
-        outf = "./Figures/deprels_%s"%language
-        dir_to_plot(ldir, outfile=outf)
+        outf = "./Figures/deprels_%s_max15"%language
+        dir_to_plot(ldir, outfile=outf, maxN=15)

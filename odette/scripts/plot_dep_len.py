@@ -43,19 +43,21 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
         x = x[:max_dep_len]
     
         index = np.arange(len(x))
-        plt.plot(index, f2, label="udpipe")
-        plt.plot(index, f1, label="maltparser")
+        plt.plot(index, f2, label="udpipe", color='#3399ff')
+        plt.plot(index, f1, label="maltparser", color='#000034')
 
-        plt.xlabel('RelationLength')
+        plt.xlabel('Relation Length')
         plt.ylabel('Attachment score')
         plt.xticks(index, x, rotation='vertical')
-        plt.legend(bbox_to_anchor=(1.1, 1.05))
+        #plt.legend(bbox_to_anchor=(1.1, 1.05))
+        plt.legend(loc=4)
         axes = plt.gca()
         axes.set_ylim([1,100])
-        plt.title(indir.split("UD_")[1].strip("/"))
-        #TODO: PROBLEM : missing values! The general plot should look the same but it is not exact
+        #plt.title(indir.split("UD_")[1].strip("/"))
         #if indir.split("UD_")[1].strip("/") == "Kazakh":
             #import ipdb;ipdb.set_trace()
+        plt.tight_layout()
+        #plt.show()
         plt.savefig(outfile)
         plt.clf()
     

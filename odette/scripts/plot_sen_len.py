@@ -39,13 +39,11 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
         plt.xlabel('Sentence Length')
         plt.ylabel('Attachment score')
         plt.xticks(index, x, rotation='vertical')
-        plt.legend(bbox_to_anchor=(1.1, 1.05))
+        #plt.legend(bbox_to_anchor=(1.1, 1.05))
+        plt.legend(loc=4)
         axes = plt.gca()
         axes.set_ylim([1,100])
         plt.title(indir.split("UD_")[1].strip("/"))
-        #TODO: PROBLEM : missing values! The general plot should look the same but it is not exact
-        #if indir.split("UD_")[1].strip("/") == "Kazakh":
-            #import ipdb;ipdb.set_trace()
         plt.savefig(outfile)
         plt.clf()
     
