@@ -30,15 +30,13 @@ class MaltParser(Parser):
 
     def train(self, trainfile, devfile=None):
         #cmd = "java -jar -Xmx8g %s -c %s -m learn -i %s -grl root"%(self._path_to_malt, self.name, trainfile)
-        cmd = "java -jar -Xmx8g %s -F ./ud.xml -c %s -m learn -i %s -grl root -a stacklazy"%(self._path_to_malt, self.name, trainfile)
-        #print cmd
+        cmd = "java -jar -Xmx8g %s -F ./ud.xml -c %s -m learn -i %s -a stacklazy"%(self._path_to_malt, self.name, trainfile)
         os.system(cmd)
 
     def parse(self, testfile, outfile):
         #TODO: I don't think I need to use ud.xml here
-        cmd = "java -jar -Xmx8g %s -F ./ud.xml -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
+        cmd = "java -jar -Xmx8g %s -F ./ud.xml -c %s -m parse -i %s -o %s "%(self._path_to_malt,self.name, testfile, outfile)
         #cmd = "java -jar -Xmx8g %s -c %s -m parse -i %s -o %s -grl root"%(self._path_to_malt,self.name, testfile, outfile)
-        #print cmd
         os.system(cmd)
 
     def is_trained(self):
@@ -58,23 +56,17 @@ class MaltOptimizer(Parser):
         os.chdir(self._path_to_malt_opt)
 
         treebank_dir = config.exp +  self.name
-        #TODO: this is a hack
-        if config.justFeatureModel:
-            cmd01 = "mv %s/phase1_logFile.txt ./"%treebank_dir
-            cmd02 = "mv %s/phase2_logFile.txt ./"%treebank_dir
-            os.system(cmd01)
-            os.system(cmd02)#getting uglier by the minute
-            cmd = "java -jar -Xmx2g %sMaltOptimizer.jar -p 3 -m %s -c %s %s"%(self._path_to_malt_opt,self._path_to_malt,trainfile, devfile)
-            os.system(cmd)
 
-        else:
-            for i in range(1,4):
+        for i in range(1,4):
+            if i == 2 and config.SKIPPHASE2:
+                cmd = "cp phase1_logFile.txt phase2_logFile.txt"#TODO: better would be to update LAS but let's try this first
+            else:
                 if i == 1 or not devfile:
                     v = ""
                 else:
                     v = "-v " + devfile
                 cmd = "java -jar -Xmx2g %sMaltOptimizer.jar -p %d -m %s -c %s %s"%(self._path_to_malt_opt, i,self._path_to_malt,trainfile, v)
-                os.system(cmd)
+            os.system(cmd)
 
         optfile = open("phase3_optFile.txt", "r")
         #take last line of file and take what's to the right of feat model option
@@ -83,13 +75,8 @@ class MaltOptimizer(Parser):
         cmd2 = "mv %s/finalOptionsFile.xml %s"%(self._path_to_malt_opt, treebank_dir)
         cmd3 = "mv %s.mco %s"%(self.name,owd)
         cmd4 = "cp %s %s"%(feature_model, treebank_dir)
-        #TODO: AAAAAH nooooo  noonoononono 
-        if justFeatureModel:
-            cmd5 = "mv phase3_logFile.txt %s"%treebank_dir
-            cmd6 = "mv phase3_optFile.txt %s"%treebank_dir
-        else:
-            cmd5 = 'for i in $(seq 1 3); do end="_optFile.txt"; mv phase$i$end %s;done'%treebank_dir
-            cmd6 = 'for i in $(seq 1 3); do end="_logFile.txt"; mv phase$i$end %s;done'%treebank_dir
+        cmd5 = 'for i in $(seq 1 3); do end="_optFile.txt"; cp phase$i$end %s;done'%treebank_dir
+        cmd6 = 'for i in $(seq 1 3); do end="_logFile.txt"; cp phase$i$end %s;done'%treebank_dir
         os.system(cmd2)
         os.system(cmd3)
         os.system(cmd4)
@@ -97,17 +84,14 @@ class MaltOptimizer(Parser):
         os.system(cmd6)
         os.chdir(owd)
         #need more for czech -- sometimes
-        cmd5 = "java -jar -Xmx2g %s -f %s/finalOptionsFile.xml -c %s_maltopt -F %s/%s"%(self._path_to_malt,treebank_dir, self.name, treebank_dir,feature_model)
-        os.system(cmd5)
+        cmd7 = "java -jar -Xmx8g %s -f %s/finalOptionsFile.xml -c %s_maltopt -F %s/%s"%(self._path_to_malt,treebank_dir, self.name, treebank_dir,feature_model)
+        os.system(cmd7)
 
     def parse(self,testfile,outfile):
-        #TODO: aaaah seriously Miryam
-        cmd = "java -jar -Xmx8g %s -f %s%s/finalOptionsFile.xml -c %s_maltopt -m parse -i %s -o %s"%(self._path_to_malt,config.exp,self.name, self.name, testfile, outfile)
+        cmd = "java -jar -Xmx8g %s -c %s_maltopt -m parse -i %s -o %s"%(self._path_to_malt,self.name, testfile, outfile)
         os.system(cmd)
 
     def is_trained(self):
-        #TODO: actually this checks if MaltParser is trained -- do something
-        #about this
         return os.path.exists("%s_maltopt.mco"%self.name)
 
 class UDPipeParser(Parser):
@@ -118,9 +102,13 @@ class UDPipeParser(Parser):
 
     def train(self,trainfile, devfile=None):
         if not devfile:
-            cmd = "udpipe --train --tagger=none --tokenizer=none --parser run=%d %s%s %s"%(self.run, self._path, self.name, trainfile)
+            cmd = "udpipe --train --tagger=none --tokenizer=none --parser 'transition_system=swap;transition_oracle=static_lazy;run=%d;' %s%s %s"%(self.run, self._path, self.name, trainfile)
         else:
-            cmd = "udpipe --train --heldout=%s --tagger=none --tokenizer=none --parser run=%d %s%s %s"%(devfile,self.run, self._path, self.name, trainfile)
+            #TODO: make this an option
+            if config.swaplazy:
+                cmd = "udpipe --train --heldout=%s --tagger=none --tokenizer=none --parser 'transition_system=swap;transition_oracle=static_lazy;run=%d;' %s%s %s"%(devfile,self.run, self._path, self.name, trainfile)
+            else:
+                cmd = "udpipe --train --heldout=%s --tagger=none --tokenizer=none --parser run=%d %s%s %s"%(devfile,self.run, self._path, self.name, trainfile)
         os.system(cmd)
 
     def parse(self,testfile,outfile):
