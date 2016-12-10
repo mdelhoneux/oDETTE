@@ -96,17 +96,18 @@ def dir_to_plot(indir, outfile='Figures/deprel.png'):
         axes = plt.gca()
         axes.set_ylim([0,1])
         plt.xticks(index + bar_width, x, rotation='vertical')
-        plt.legend(bbox_to_anchor=(1.1, 1.05))
-        #plt.tight_layout()
-        plt.title(indir.split("UD_")[1].strip("/"))
-        #plt.title("Slovenian original")
+        plt.legend(bbox_to_anchor=(0.4, 1.05), loc=2, borderaxespad=0.)
+        plt.tight_layout()
+        #plt.title(indir.split("UD_")[1].strip("/"))
         plt.savefig(outfile)
-        #plt.show()
+        plt.show()
         plt.clf()
     
 if __name__=="__main__":
     exp = config.exp
     for language in os.listdir(exp):
-        ldir = exp + "/" + language
-        outf = "./Figures/postag_%s"%language
-        dir_to_plot(ldir, outfile=outf)
+        #TODO: REMOVEME REMOVEME
+        if language == "UD_concat9000":
+            ldir = exp + "/" + language
+            outf = "./Figures/postag_%s"%language
+            dir_to_plot(ldir, outfile=outf)
