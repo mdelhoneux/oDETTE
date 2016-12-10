@@ -19,7 +19,7 @@ import config
 import src.utils
 from src.utils import human_format
 from scripts.preprocess_files import prepare_files
-from scripts.baseline import run_baseline, run_baseline_with_tagger, learning_curve, error_analysis, optimize_udpipe
+from scripts.baseline import run_baseline, run_baseline_with_tagger, learning_curve, optimize_udpipe
 from scripts.experiment import run_experiment, evaluate_on_transformed_gold, check_non_projectivity,evaluate_back_transformation_accuracy
 from scripts.collect_stats import run_stats
 
@@ -36,8 +36,6 @@ def run(language, exp_type, metric, parser):
         return optimize_udpipe(language, outdir=language_dir, parser=parser)
     elif exp_type == "learning_curve":
         return learning_curve(language,outdir=language_dir,parser=parser)
-    elif exp_type == "error_analysis":
-        return error_analysis(language, outdir=language_dir,parser=parser)
     elif exp_type == "prep":
         prepare_files(language,outdir=language_dir)
         return None
@@ -67,7 +65,6 @@ headers = {
     "tag_parse": "language;LAS;UAS;UPOS;XPOS\n",
     "opt_udpipe": "language;run_n\n",
     "learning_curve": split_sizes_str,
-    "error_analysis": senlen_str,
     "stats": "language;n sentences; n tokens; aux freq \n",
     "ms_gold": "language; LAS ; baseline LAS\n",
     "non_proj": "language; gold nproj; ms nproj; backtransformation nproj \n",
@@ -94,13 +91,16 @@ if __name__=="__main__":
     arg_parser.add_argument('--outfile', default = './results.csv', help='A file name, it will contain the results: Default: results.csv in current directory')
     #TODO: note my preprocess could become obsolete with new treebank manager
     # would need to update treebank_transformer I guess
-    arg_parser.add_argument('--exp_type', default = 'baseline', help='Type of  \
-                            experiment to carry. Default: run all baselines.  {prep: preprocess files \
+    arg_parser.add_argument('--exp_type', default = 'tag_parse', help='Type of  \
+                            experiment to carry. Default: tag and parse.  {prep: preprocess files \
                                                                                stats: count sentences, tokens and auxiliaries \
                                                                                exp: run experiment \
                                                                                ms_gold: evaluate on transformed rep (warning: experiment must have been run before).  \
                                                                                non_proj: counts non-projectivity in gold, transformed and backtransformed training data.  \
                                                                                backtransf: test the accuracy of the backtransformation on the training files \
+                                                                               tag_parse: tag (with udpipe) and parse with whatever parse \
+                                                                               opt_udpipe: optimize a udpipe model for a language (runs a certain number of runs -- to be picked manually afterwards) \
+                                                                               learning_curve: train and parse for a number of splits of the training set \
                                                                               }')
     arg_parser.add_argument('--include', default = 'all', help="The languages to be run, all by default")
     arg_parser.add_argument('--exclude', default = None, help="languages not to be run, default is none (warning: will exclude anything added in include)")
@@ -116,8 +116,9 @@ if __name__=="__main__":
     metric = args['metric']
     parser = args['parser']
     parallel = bool(int(args['parallel']))
-    #just in case
-    if parser == "maltOpt":
+    #maltOpt cannot be run in parallel and the learning curve is parallel so
+    #this avoids nested parallelization which does not work
+    if parser == "maltOpt" or exp_type == "learning_curve":
         parallel = 0
 
 
