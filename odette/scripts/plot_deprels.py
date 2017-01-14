@@ -7,7 +7,7 @@ from math import sqrt
 import config
 from src.malteval import Malteval
 
-def dir_to_plot(indir, outfile='Figures/deprel.png', maxN=100):
+def dir_to_plot(indir, highlighted = None, outfile='Figures/deprel.png', maxN=100):
         #TODO: rename
         gold = indir + '/dev_gold.conll'
         #for conv (erm) baseline = malt, transf = udpipe
@@ -51,17 +51,21 @@ def dir_to_plot(indir, outfile='Figures/deprel.png', maxN=100):
         #f1 = [i*100 for i in f1]
         #f2 = [i*100 for i in f2]
 
-        f1 = f1[inds]
+        #f1 = f1[inds]
+        f1 = [i*100 for i in f1[inds]]
         #import ipdb; ipdb.set_trace()
         #fails on TAMIL not worth fixing for now
         try:
-            f2 = f2[inds]
+            #f2 = f2[inds]
+            f2 = [i*100 for i in f2[inds]]
         except IndexError:
             return
         st1 = st1[inds]
         st2 = st2[inds]
-        me1 = me1[inds]
-        me2 = me2[inds]
+        #me1 = me1[inds]
+        me1 = [i*100 for i in me1[inds]]
+        me2 = [i*100 for i in me2[inds]]
+        #me2 = me2[inds]
 
 
     
@@ -70,8 +74,17 @@ def dir_to_plot(indir, outfile='Figures/deprel.png', maxN=100):
         plt.figure()
         bar_width = 0.35
         index = np.arange(len(x))
+        if highlighted is not None:
+            alpha = [0.2 for i in range(len(x))]
+            alpha[highlighted] = 1.
+        else:
+            alpha = [1. for i in range(len(x))]
+        maltcolor = np.array([(0., 0., 0.204,i) for i in alpha])
+        udpipecolor = np.array([(0.2, 0.6, 1.,i) for i in alpha])
         plt.bar(index,f1, bar_width,
-                            color='#000034',
+                            #color='#000034',
+                            color = maltcolor,
+                            edgecolor='none',
                              error_kw=error_config,
                              #yerr=st1,
                              yerr=me1,
@@ -79,7 +92,9 @@ def dir_to_plot(indir, outfile='Figures/deprel.png', maxN=100):
                              )
     
         plt.bar(index + bar_width ,f2, bar_width,
-                            color='#3399ff',
+                            #color='#3399ff',
+                            edgecolor='none',
+                            color= udpipecolor,
                              error_kw=error_config,
                              #yerr=st2,
                              yerr=me2,
@@ -87,21 +102,27 @@ def dir_to_plot(indir, outfile='Figures/deprel.png', maxN=100):
                              )
     
         plt.xlabel('Dependency Relations')
-        plt.ylabel('Attachment score')
+        plt.ylabel('F1')
         axes = plt.gca()
-        axes.set_ylim([0,1])
+        #axes.set_ylim([0,1)
+        axes.set_ylim([0,100])
         plt.xticks(index + bar_width, x, rotation='vertical')
         plt.legend(bbox_to_anchor=(0.45, 1.05), loc=2, borderaxespad=0.)
         #plt.title(indir.split("UD_")[1].strip("/"))
         plt.autoscale(axis='x')
         plt.tight_layout()
         plt.savefig(outfile)
-        #plt.show()
+        plt.show()
         plt.clf()
     
 if __name__=="__main__":
     exp = config.exp
-    for language in os.listdir(exp):
-        ldir = exp + "/" + language
-        outf = "./Figures/deprels_%s_max15"%language
-        dir_to_plot(ldir, outfile=outf, maxN=15)
+    #for language in os.listdir(exp):
+    language = "UD_concat9000"
+    ldir = exp + "/" + language
+    if len(sys.argv)>1:
+        highlighted = int(sys.argv[1])
+    else:
+        highlighted = None
+    outf = "./Figures/deprel_%s.png"%highlighted
+    dir_to_plot(ldir, outfile=outf, highlighted = highlighted, maxN=15)
