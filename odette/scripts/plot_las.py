@@ -34,7 +34,10 @@ if __name__=="__main__":
 
     plt.bar(index + 2*bar_width ,f3, bar_width,
             edgecolor='none',
-            color='#004C99',
+            #TODO: problem: zebra - but I use dark and light contrast in rest of
+            #slides
+            #color='#004C99',
+            color='#97caef',
             #color='white',
             label = 'syntaxnet',
            )
