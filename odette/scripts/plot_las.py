@@ -10,11 +10,12 @@ from src.malteval import Malteval
 
 if __name__=="__main__":
     results = [line.strip("\n").split(";") for line in open("RES/las.csv", 'r')][1:]
-    #TODO: sort by size (res[1])
-    x = [res[0] for res in results]
-    f1 = [float(res[3]) for res in results]
-    f2 = [float(res[2]) for res in results]
-    f3 = [float(res[4]) for res in results]
+    size = np.array([int(res[1].strip("K")) for res in results])
+    inds = size.argsort()[::-1]
+    x = np.array([res[0] +"\n" + res[1] for res in results])[inds]
+    f1 = np.array([float(res[3]) for res in results])[inds]
+    f2 = np.array([float(res[2]) for res in results])[inds]
+    f3 = np.array([float(res[4]) for res in results])[inds]
 
     plt.figure()
     bar_width = 0.25
@@ -35,13 +36,13 @@ if __name__=="__main__":
             edgecolor='none',
             color='#004C99',
             #color='white',
-            label = 'SyntaxNet',
+            label = 'syntaxnet',
            )
 
     plt.ylabel('LAS')
     axes = plt.gca()
     axes.set_ylim([0,100])
-    plt.xticks(index + bar_width, x)
+    plt.xticks(index + 1.5*bar_width, x)
     plt.legend(bbox_to_anchor=(0.45, 1.05), loc=2, borderaxespad=0.)
     plt.autoscale(axis='x')
     plt.tight_layout()
