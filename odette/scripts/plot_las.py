@@ -17,7 +17,7 @@ if __name__=="__main__":
     f2 = np.array([float(res[2]) for res in results])[inds]
     f3 = np.array([float(res[4]) for res in results])[inds]
 
-    plt.figure()
+    fig = plt.figure()
     bar_width = 0.25
     index = np.arange(len(x))
     plt.bar(index,f1, bar_width,
@@ -34,20 +34,26 @@ if __name__=="__main__":
 
     plt.bar(index + 2*bar_width ,f3, bar_width,
             edgecolor='none',
-            #TODO: problem: zebra - but I use dark and light contrast in rest of
-            #slides
-            #color='#004C99',
             color='#97caef',
             #color='white',
             label = 'syntaxnet',
+            #label = '', 
            )
 
     plt.ylabel('LAS')
     axes = plt.gca()
     axes.set_ylim([0,100])
     plt.xticks(index + 1.5*bar_width, x)
-    plt.legend(bbox_to_anchor=(0.45, 1.05), loc=2, borderaxespad=0.)
+    #plt.legend(bbox_to_anchor=(0.45, 1.05), loc=2, borderaxespad=0., frameon=False)
+    leg = plt.legend(loc=1, borderaxespad=0., frameon=False)
+    # swap_and_right_align_legend 
+
+    vp = leg._legend_box._children[-1]._children[0] 
+    for c in vp._children: 
+        c._children.reverse() 
+        vp.align="right" 
     plt.autoscale(axis='x')
     plt.tight_layout()
     plt.show()
-    plt.savefig("Figures/las.png")
+    #fig.savefig("Figures/las_nosyntaxnet.png")
+    fig.savefig("Figures/las.png")
